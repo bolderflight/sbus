@@ -17,7 +17,7 @@ The SBUS protocol uses inverted serial logic with a baud rate of 100000, 8 data 
    * Bit 0 - 3: n/a
 * Byte[24]: SBUS End Byte, 0x00
 
-A table mapping bytes[1-22] to servo channels is [included](https://github.com/bolderflight/SBUS/blob/master/docs/bit-mapping.ods).
+A table mapping bytes[1-22] to servo channels is [included](https://github.com/bolderflight/SBUS/blob/master/docs/bit-mapping.pdf).
 
 This library has two basic modes of functionality:
 
