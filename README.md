@@ -27,7 +27,7 @@ This library has two basic modes of functionality:
 This library has been tested using FrSky SBUS capable receivers (X8R and X4R) and FrSky SBUS capable servos (D25MA). Feedback from users, especially with other brand receivers and servos (i.e. Futaba), would be greatly appreciated.
 
 # Usage
-This library uses the [hardware serial](https://www.pjrc.com/teensy/td_uart.html) for Teensy devices.
+This library uses the [hardware serial](https://www.pjrc.com/teensy/td_uart.html) for Teensy devices. Additionally, this library [**requires Teensyduino 1.30 beta 2**](https://forum.pjrc.com/threads/35700-Teensyduino-1-30-Beta-2-Available).
 
 Simply clone or download and extract the zipped library into your Arduino/libraries folder.
 
