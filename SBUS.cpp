@@ -22,6 +22,9 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// Teensy 3.1/3.2 || Teensy LC 
+#if defined(__MK20DX256__) || defined(__MKL26Z64__)
+
 #include "Arduino.h"
 #include "SBUS.h"
 
@@ -47,8 +50,15 @@ void SBUS::begin(){
 		_port = &Serial1;
 	}
 
-	// begin the serial port for SBUS
-	_port->begin(100000,SERIAL_8E1_RXINV_TXINV);
+	#if defined(__MK20DX256__)  // Teensy 3.1/3.2
+		// begin the serial port for SBUS
+		_port->begin(100000,SERIAL_8E1_RXINV_TXINV);
+	#endif
+
+	#if defined(__MKL26Z64__)  // Teensy LC
+		// begin the serial port for SBUS
+		_port->begin(100000,SERIAL_8E2_RXINV_TXINV);
+	#endif
 }
 
 /* read the SBUS data and calibrate it to +/- 1 */
@@ -164,8 +174,6 @@ bool SBUS::parse(){
 /* write SBUS packets */
 void SBUS::write(int16_t* channels){
 	uint8_t packet[25];
-	elapsedMicros byteDelay = 0;
-	int sendIndex = 0;
 
 	/* assemble the SBUS packet */
 
@@ -202,12 +210,25 @@ void SBUS::write(int16_t* channels){
 	// footer
 	packet[24] = SBUS_FOOTER;
 
-	// write packet
-	while(sendIndex < 25){
-		if(byteDelay >=122){ // theoretically, this is 120, but I'm using 122 to be safe
-			byteDelay = 0;
-			_port->write(packet[sendIndex]);
-			sendIndex++;
+	#if defined(__MK20DX256__) // Teensy 3.1/3.2
+
+		elapsedMicros byteDelay = 122;
+		int sendIndex = 0;
+
+		// write packet
+		while(sendIndex < 25){
+			if(byteDelay >=122){ // theoretically, this is 120, but I'm using 122 to be safe
+				byteDelay = 0;
+				_port->write(packet[sendIndex]);
+				sendIndex++;
+			}
 		}
-	}
+	#endif
+
+	#if defined(__MKL26Z64__) // Teensy LC
+		// write packet
+		_port->write(packet,25);
+	#endif
 }
+
+#endif
