@@ -2,7 +2,7 @@
 SBUS.h
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-07-12
+2016-09-02
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -27,14 +27,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "Arduino.h"
 
-const uint8_t SBUS_HEADER 		= 0x0F;
-const uint8_t SBUS_FOOTER 		= 0x00;
-const uint8_t SBUS_LOST_FRAME 	= 0x20;
-const uint8_t SBUS_FAILSAFE 	= 0x10;
-const int PAYLOAD_SIZE 			= 24;
-const double SBUS_SCALE 		= 0.0012202562538133;
-const double SBUS_BIAS			= -1.20988407565589;				
-
 class SBUS{
 	public:
     	SBUS(int bus);
@@ -45,7 +37,14 @@ class SBUS{
   	private:
   		int _bus;
   		int _fpos;
-  		uint8_t _payload[PAYLOAD_SIZE];
+  		const double _sbusScale = 0.0012202562538133;
+  		const double _sbusBias = -1.20988407565589;
+  		static const uint8_t _sbusHeader = 0x0F;
+  		static const uint8_t _sbusFooter = 0x00;
+  		static const uint8_t _sbusLostFrame = 0x20;
+  		static const uint8_t _sbusFailSafe = 0x10;
+  		static const int _payloadSize = 24;
+  		uint8_t _payload[_payloadSize];
   		HardwareSerial* _port;
   		bool parse();
 };
