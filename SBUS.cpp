@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-07-12
+2016-09-02
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -60,7 +60,7 @@ bool SBUS::readCal(float* calChannels, uint8_t* failsafe, int* lostFrames){
 
 		// linear calibration
     	for(uint8_t i = 0; i < 16; i++){
-      		calChannels[i] = channels[i] * SBUS_SCALE + SBUS_BIAS;
+      		calChannels[i] = channels[i] * _sbusScale + _sbusBias;
     	}
 
     	// return true on receiving a full packet
@@ -98,12 +98,12 @@ bool SBUS::read(int16_t* channels, uint8_t* failsafe, int* lostFrames){
     	channels[15] = (int16_t) ((_payload[20]>>5|_payload[21]<<3)                         & 0x07FF);
 
     	// count lost frames
-    	if (_payload[22] == SBUS_LOST_FRAME) {
+    	if (_payload[22] == _sbusLostFrame) {
       		*lostFrames = *lostFrames + 1;
     	}
 
     	// failsafe state
-    	if (_payload[22] == SBUS_FAILSAFE) {
+    	if (_payload[22] == _sbusFailSafe) {
       		*failsafe = 1;
     	} 
     	else{
@@ -129,7 +129,7 @@ bool SBUS::parse(){
 
     	// find the header
     	if(_fpos == 0){
-      		if(c == SBUS_HEADER){
+      		if(c == _sbusHeader){
         		_fpos++;
       		}
       		else{
@@ -139,14 +139,14 @@ bool SBUS::parse(){
     	else{
 
     		// strip off the data
-    		if((_fpos-1) < PAYLOAD_SIZE){
+    		if((_fpos-1) < _payloadSize){
       			_payload[_fpos-1] = c;
       			_fpos++;
     		}
 
     		// check the end byte
-    		if((_fpos-1) == PAYLOAD_SIZE){
-      			if(c == SBUS_FOOTER){
+    		if((_fpos-1) == _payloadSize){
+      			if(c == _sbusFooter){
         			_fpos = 0;
         			return true;
       			}
@@ -170,7 +170,7 @@ void SBUS::write(int16_t* channels){
 	/* assemble the SBUS packet */
 
 	// SBUS header
-	packet[0] = SBUS_HEADER; 
+	packet[0] = _sbusHeader; 
 
 	// 16 channels of 11 bit data
   	packet[1] = (uint8_t) ((channels[0] & 0x07FF));
@@ -200,7 +200,7 @@ void SBUS::write(int16_t* channels){
 	packet[23] = 0x00;
 
 	// footer
-	packet[24] = SBUS_FOOTER;
+	packet[24] = _sbusFooter;
 
 	// write packet
 	while(sendIndex < 25){
