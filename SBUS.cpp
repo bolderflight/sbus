@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-02
+2016-09-19
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -27,6 +27,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "Arduino.h"
 #include "SBUS.h"
+
+#if defined(__MK20DX256__)
+	// globals needed for emulating two stop bytes on Teensy 3.1/3.2
+	IntervalTimer serialTimer;
+	HardwareSerial* SERIALPORT;
+	uint8_t PACKET[25];
+	volatile int SENDINDEX;
+	void sendByte();
+#endif
 
 /* SBUS object, input the serial bus */
 SBUS::SBUS(int bus){
@@ -53,6 +62,7 @@ void SBUS::begin(){
 	#if defined(__MK20DX256__)  // Teensy 3.1/3.2
 		// begin the serial port for SBUS
 		_port->begin(100000,SERIAL_8E1_RXINV_TXINV);
+		SERIALPORT = _port;
 	#endif
 
 	#if defined(__MKL26Z64__)  // Teensy LC
@@ -211,18 +221,13 @@ void SBUS::write(int16_t* channels){
 	packet[24] = _sbusFooter;
 
 	#if defined(__MK20DX256__) // Teensy 3.1/3.2
-
-		elapsedMicros byteDelay = 122;
-		int sendIndex = 0;
-
-		// write packet
-		while(sendIndex < 25){
-			if(byteDelay >=122){ // theoretically, this is 120, but I'm using 122 to be safe
-				byteDelay = 0;
-				_port->write(packet[sendIndex]);
-				sendIndex++;
-			}
-		}
+		// use ISR to send byte at a time, 
+		// 130 us between bytes to emulate 2 stop bits
+		noInterrupts();
+		memcpy(&PACKET,&packet,sizeof(packet));
+		interrupts();
+		serialTimer.priority(255);
+		serialTimer.begin(sendByte,130);
 	#endif
 
 	#if defined(__MKL26Z64__) // Teensy LC
@@ -230,5 +235,20 @@ void SBUS::write(int16_t* channels){
 		_port->write(packet,25);
 	#endif
 }
+
+// function to send byte at a time with
+// ISR to emulate 2 stop bits on Teensy 3.1/3.2
+#if defined(__MK20DX256__) // Teensy 3.1/3.2
+	void sendByte(){
+		if(SENDINDEX < 25) {
+			SERIALPORT->write(PACKET[SENDINDEX]);
+			SENDINDEX++;
+		}
+		else{
+			serialTimer.end();
+			SENDINDEX = 0;
+		}
+	}
+#endif
 
 #endif
