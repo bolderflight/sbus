@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-19
+2016-09-21
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -72,8 +72,8 @@ void SBUS::begin(){
 }
 
 /* read the SBUS data and calibrate it to +/- 1 */
-bool SBUS::readCal(float* calChannels, uint8_t* failsafe, int* lostFrames){
-	int16_t channels[16];
+bool SBUS::readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames){
+	uint16_t channels[16];
 
 	// read the SBUS data
 	if(read(&channels[0],failsafe,lostFrames)){
@@ -94,7 +94,7 @@ bool SBUS::readCal(float* calChannels, uint8_t* failsafe, int* lostFrames){
 }
 
 /* read the SBUS data */
-bool SBUS::read(int16_t* channels, uint8_t* failsafe, int* lostFrames){
+bool SBUS::read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames){
 
   	// parse the SBUS packet
   	if(parse()){
@@ -182,7 +182,7 @@ bool SBUS::parse(){
 }
 
 /* write SBUS packets */
-void SBUS::write(int16_t* channels){
+void SBUS::write(uint16_t* channels){
 	uint8_t packet[25];
 
 	/* assemble the SBUS packet */

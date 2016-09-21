@@ -47,39 +47,39 @@ This should be called in your setup function. It initializes the serial communic
 x8r.begin();
 ```
 
-**bool read(int16_t* channels, uint8_t* failsafe, int* lostFrames)**
-*read(int16_t&ast; channels, uint8_t&ast; failsafe, int&ast; lostFrames)* reads data from the SBUS receiver and parses the SBUS packet. When a complete packet is received, *read(int16_t&ast; channels, uint8_t&ast; failsafe, int&ast; lostFrames)* returns *true* and the *channels[0-15]*, *failsafe*, and *lost frames* data is available. Note that *lost frames* is a counter that increments once each time a lost frame flag is read in the SBUS packet. For example, placing the following code in the loop function will print the value of *channel 0* every time a valid SBUS packet is received.
+**bool read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames)**
+*read(uint16_t&ast; channels, uint8_t&ast; failsafe, uint16_t&ast; lostFrames)* reads data from the SBUS receiver and parses the SBUS packet. When a complete packet is received, *read(uint16_t&ast; channels, uint8_t&ast; failsafe, uint16_t&ast; lostFrames)* returns *true* and the *channels[0-15]*, *failsafe*, and *lost frames* data is available. Note that *lost frames* is a counter that increments once each time a lost frame flag is read in the SBUS packet. For example, placing the following code in the loop function will print the value of *channel 0* every time a valid SBUS packet is received.
 
 ```C++
-int16_t channels[16];
+uint16_t channels[16];
 uint8_t failSafe;
-int lostFrames = 0;
+uint16_t lostFrames = 0;
 
 if(x8r.read(&channels[0], &failSafe, &lostFrames)){
 	Serial.println(channels[0]);
 }
 ```
 
-**bool readCal(float* calChannels, uint8_t* failsafe, int* lostFrames)**
-*readCal(float&ast; calChannels, uint8_t&ast; failsafe, int&ast; lostFrames)* reads data from the SBUS receiver and parses the SBUS packet. The data from *channels[0-15]* is calibrated to a +/- 1.0 float value assuming a linear relationship based on the minimum and maximum value (172 and 1811 using FrSky set to 0-100%). When a complete packet is received, *readCal(float&ast; calChannels, uint8_t&ast; failsafe, int&ast; lostFrames)* returns *true* and the *calChannels[0-15]*, *failsafe*, and *lost frames* data is available. Note that *lost frames* is a counter that increments once each time a lost frame flag is read in the SBUS packet. For example, placing the following code in the loop function will print the calibrated value of *channel 0* every time a valid SBUS packet is received.
+**bool readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames)**
+*readCal(float&ast; calChannels, uint8_t&ast; failsafe, uint16_t&ast; lostFrames)* reads data from the SBUS receiver and parses the SBUS packet. The data from *channels[0-15]* is calibrated to a +/- 1.0 float value assuming a linear relationship based on the minimum and maximum value (172 and 1811 using FrSky set to 0-100%). When a complete packet is received, *readCal(float&ast; calChannels, uint8_t&ast; failsafe, uint16_t&ast; lostFrames)* returns *true* and the *calChannels[0-15]*, *failsafe*, and *lost frames* data is available. Note that *lost frames* is a counter that increments once each time a lost frame flag is read in the SBUS packet. For example, placing the following code in the loop function will print the calibrated value of *channel 0* every time a valid SBUS packet is received.
 
 ```C++
 float channels[16];
 uint8_t failSafe;
-int lostFrames = 0;
+uint16_t lostFrames = 0;
 
 if(x8r.readCal(&channels[0], &failSafe, &lostFrames)){
 	Serial.println(channels[0]);
 }
 ```
 
-**void write(int16_t* channels)**
-*write(int16_t&ast; channels)* writes the SBUS packet to SBUS capable servos given position commands from *channels[0-15]*. Note that this function simply creates and sends the SBUS packet, but does not handle timing (i.e. the time between sending subsequent SBUS packets). This timing must be handled by the calling function. For example, placing the following code in the loop function will create and send the SBUS packet to servos every time a valid SBUS packet is received.
+**void write(uint16_t* channels)**
+*write(uint16_t&ast; channels)* writes the SBUS packet to SBUS capable servos given position commands from *channels[0-15]*. Note that this function simply creates and sends the SBUS packet, but does not handle timing (i.e. the time between sending subsequent SBUS packets). This timing must be handled by the calling function. For example, placing the following code in the loop function will create and send the SBUS packet to servos every time a valid SBUS packet is received.
 
 ```C++
-int16_t channels[16];
+uint16_t channels[16];
 uint8_t failSafe;
-int lostFrames = 0;
+uint16_t lostFrames = 0;
 
 // look for a good SBUS packet from the receiver
 if(x8r.read(&channels[0], &failSafe, &lostFrames)){

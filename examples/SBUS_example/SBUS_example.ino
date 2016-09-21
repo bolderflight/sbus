@@ -2,7 +2,7 @@
 SBUS_example.ino
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-07-12
+2016-09-21
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -40,9 +40,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 SBUS x8r(1);
 
 // channel, fail safe, and lost frames data
-int16_t channels[16];
+uint16_t channels[16];
 uint8_t failSafe;
-int lostFrames = 0;
+uint16_t lostFrames = 0;
 
 void setup() {
   // begin the SBUS communication

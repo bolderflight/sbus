@@ -2,7 +2,7 @@
 SBUS.h
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-02
+2016-09-21
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -31,14 +31,14 @@ class SBUS{
 	public:
     	SBUS(int bus);
     	void begin();
-    	bool read(int16_t* channels, uint8_t* failsafe, int* lostFrames);
-    	bool readCal(float* calChannels, uint8_t* failsafe, int* lostFrames);
-    	void write(int16_t* channels);
+    	bool read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames);
+    	bool readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames);
+    	void write(uint16_t* channels);
   	private:
   		int _bus;
   		int _fpos;
-  		const double _sbusScale = 0.0012202562538133;
-  		const double _sbusBias = -1.20988407565589;
+  		const float _sbusScale = 0.00122025625f;
+  		const float _sbusBias = -1.2098840f;
   		static const uint8_t _sbusHeader = 0x0F;
   		static const uint8_t _sbusFooter = 0x00;
   		static const uint8_t _sbusLostFrame = 0x20;
