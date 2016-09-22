@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-21
+2016-09-22
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -38,7 +38,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 #endif
 
 /* SBUS object, input the serial bus */
-SBUS::SBUS(int bus){
+SBUS::SBUS(uint8_t bus){
 	_bus = bus; // serial bus
 }
 

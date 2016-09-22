@@ -2,7 +2,7 @@
 SBUS.h
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-21
+2016-09-22
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -29,23 +29,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 class SBUS{
 	public:
-    	SBUS(int bus);
+    	SBUS(uint8_t bus);
     	void begin();
     	bool read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames);
     	bool readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames);
     	void write(uint16_t* channels);
   	private:
-  		int _bus;
-  		int _fpos;
+  		uint8_t _bus;
+  		uint8_t _fpos;
   		const float _sbusScale = 0.00122025625f;
   		const float _sbusBias = -1.2098840f;
-  		static const uint8_t _sbusHeader = 0x0F;
-  		static const uint8_t _sbusFooter = 0x00;
-  		static const uint8_t _sbusLostFrame = 0x20;
-  		static const uint8_t _sbusFailSafe = 0x10;
+  		const uint8_t _sbusHeader = 0x0F;
+  		const uint8_t _sbusFooter = 0x00;
+  		const uint8_t _sbusLostFrame = 0x20;
+  		const uint8_t _sbusFailSafe = 0x10;
   		static const int _payloadSize = 24;
   		uint8_t _payload[_payloadSize];
   		HardwareSerial* _port;
+  		
   		bool parse();
 };
 
