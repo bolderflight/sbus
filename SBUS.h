@@ -43,7 +43,7 @@ class SBUS{
   		const uint8_t _sbusFooter = 0x00;
   		const uint8_t _sbusLostFrame = 0x20;
   		const uint8_t _sbusFailSafe = 0x10;
-  		static const int _payloadSize = 24;
+  		static const uint8_t _payloadSize = 24;
   		uint8_t _payload[_payloadSize];
   		HardwareSerial* _port;
   		

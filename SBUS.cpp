@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-22
+2016-10-03
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -22,14 +22,15 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Teensy 3.1/3.2 || Teensy LC 
-#if defined(__MK20DX256__) || defined(__MKL26Z64__)
+// Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC 
+#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || \
+	defined(__MK66FX1M0__) || defined(__MKL26Z64__)
 
 #include "Arduino.h"
 #include "SBUS.h"
 
-#if defined(__MK20DX256__)
-	// globals needed for emulating two stop bytes on Teensy 3.1/3.2
+#if defined(__MK20DX128__) || defined(__MK20DX256__)
+	// globals needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2
 	IntervalTimer serialTimer;
 	HardwareSerial* SERIALPORT;
 	uint8_t PACKET[25];
@@ -49,23 +50,50 @@ void SBUS::begin(){
 	_fpos = 0;
 
 	// select the serial port
-	if(_bus == 3){
-		_port = &Serial3;
-	}
-	else if(_bus == 2){
-		_port = &Serial2;
-	}
-	else{
-		_port = &Serial1;
-	}
+	#if defined(__MK20DX128__) || defined(__MK20DX256__) ||  defined(__MKL26Z64__) // Teensy 3.0 || Teensy 3.1/3.2 || Teensy LC
 
-	#if defined(__MK20DX256__)  // Teensy 3.1/3.2
+		if(_bus == 3){
+			_port = &Serial3;
+		}
+		else if(_bus == 2){
+			_port = &Serial2;
+		}
+		else{
+			_port = &Serial1;
+		}
+
+	#endif
+
+	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) // Teensy 3.5 || Teensy 3.6
+
+		if(_bus == 6){
+			_port = &Serial6;
+		}
+		else if(_bus == 5){
+			_port = &Serial5;
+		}
+		else if(_bus == 4){
+			_port = &Serial4;
+		}
+		else if(_bus == 3){
+			_port = &Serial3;
+		}
+		else if(_bus == 2){
+			_port = &Serial2;
+		}
+		else{
+			_port = &Serial1;
+		}
+
+	#endif
+
+	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		// begin the serial port for SBUS
 		_port->begin(100000,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _port;
 	#endif
 
-	#if defined(__MKL26Z64__)  // Teensy LC
+	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC 
 		// begin the serial port for SBUS
 		_port->begin(100000,SERIAL_8E2_RXINV_TXINV);
 	#endif
@@ -220,7 +248,7 @@ void SBUS::write(uint16_t* channels){
 	// footer
 	packet[24] = _sbusFooter;
 
-	#if defined(__MK20DX256__) // Teensy 3.1/3.2
+	#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
 		// use ISR to send byte at a time, 
 		// 130 us between bytes to emulate 2 stop bits
 		noInterrupts();
@@ -230,15 +258,15 @@ void SBUS::write(uint16_t* channels){
 		serialTimer.begin(sendByte,130);
 	#endif
 
-	#if defined(__MKL26Z64__) // Teensy LC
+	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC
 		// write packet
 		_port->write(packet,25);
 	#endif
 }
 
 // function to send byte at a time with
-// ISR to emulate 2 stop bits on Teensy 3.1/3.2
-#if defined(__MK20DX256__) // Teensy 3.1/3.2
+// ISR to emulate 2 stop bits on Teensy 3.0 and 3.1/3.2
+#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
 	void sendByte(){
 		if(SENDINDEX < 25) {
 			SERIALPORT->write(PACKET[SENDINDEX]);

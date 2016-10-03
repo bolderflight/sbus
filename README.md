@@ -1,5 +1,5 @@
 # SBUS
-Library for communicating with SBUS receivers and servos using Teensy 3.1/3.2 and LC devices.
+Library for communicating with SBUS receivers and servos using Teensy 3.x and Teensy LC devices.
 
 # Description
 SBUS is a protocol for RC receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single signal line can be connected up to 16 servos with each receiving a unique command. SBUS capable servos are required; each can be programmed with a unique address (Channel 0 - 15) using an SBUS servo programmer. Advantages of SBUS include the reduction of wiring clutter and ease of parsing commands from RC receivers.
