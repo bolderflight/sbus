@@ -37,6 +37,7 @@ class SBUS{
   	private:
   		uint8_t _bus;
   		uint8_t _fpos;
+        const uint16_t SBUS_TIMEOUT = 10000;
   		const float _sbusScale = 0.00122025625f;
   		const float _sbusBias = -1.2098840f;
   		const uint8_t _sbusHeader = 0x0F;

@@ -170,9 +170,13 @@ bool SBUS::read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames){
 
 /* parse the SBUS data */
 bool SBUS::parse(){
+    static elapsedMicros sbusTime = 0;
+
+    if(sbusTime > SBUS_TIMEOUT){_fpos = 0;}
 
   	// see if serial data is available
   	while(_port->available() > 0){
+        sbusTime = 0;
     	uint8_t c = _port->read();
 
     	// find the header
