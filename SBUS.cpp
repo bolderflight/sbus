@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-10-03
+2016-11-15
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -146,12 +146,12 @@ bool SBUS::read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames){
     	channels[15] = (int16_t) ((_payload[20]>>5|_payload[21]<<3)                         & 0x07FF);
 
     	// count lost frames
-    	if (_payload[22] == _sbusLostFrame) {
+    	if (_payload[22] & _sbusLostFrame) {
       		*lostFrames = *lostFrames + 1;
     	}
 
     	// failsafe state
-    	if (_payload[22] == _sbusFailSafe) {
+    	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = 1;
     	} 
     	else{
