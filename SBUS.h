@@ -2,7 +2,7 @@
 SBUS.h
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-11-15
+2017-01-13
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -42,6 +42,7 @@ class SBUS{
   		const float _sbusBias = -1.2098840f;
   		const uint8_t _sbusHeader = 0x0F;
   		const uint8_t _sbusFooter = 0x00;
+      const uint8_t _sbus2Footer = 0x04;
   		const uint8_t _sbusLostFrame = 0x04;
   		const uint8_t _sbusFailSafe = 0x08;
   		static const uint8_t _payloadSize = 24;

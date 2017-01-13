@@ -2,7 +2,7 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-11-15
+2017-01-13
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -198,7 +198,7 @@ bool SBUS::parse(){
 
     		// check the end byte
     		if((_fpos-1) == _payloadSize){
-      			if(c == _sbusFooter){
+      			if((c == _sbusFooter)||((c & 0x0F) == _sbus2Footer)) {
         			_fpos = 0;
         			return true;
       			}
