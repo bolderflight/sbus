@@ -29,13 +29,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 class SBUS{
 	public:
-    	SBUS(uint8_t bus);
+    	SBUS(HardwareSerial& bus);
     	void begin();
     	bool read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames);
     	bool readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames);
     	void write(uint16_t* channels);
   	private:
-  		uint8_t _bus;
   		uint8_t _fpos;
         const uint16_t SBUS_TIMEOUT = 10000;
   		const float _sbusScale = 0.00122025625f;
@@ -47,7 +46,7 @@ class SBUS{
   		const uint8_t _sbusFailSafe = 0x08;
   		static const uint8_t _payloadSize = 24;
   		uint8_t _payload[_payloadSize];
-  		HardwareSerial* _port;
+  		HardwareSerial* _bus;
   		
   		bool parse();
 };

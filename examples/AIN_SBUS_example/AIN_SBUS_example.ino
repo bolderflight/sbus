@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 // a SBUS object, which is on Teensy hardware
 // serial port 1
-SBUS x8r(1);
+SBUS x8r(Serial1);
 
 // analog read values, 16 bit counts
 uint16_t ain[10];
