@@ -39,63 +39,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 #endif
 
 /* SBUS object, input the serial bus */
-SBUS::SBUS(uint8_t bus){
-	_bus = bus; // serial bus
+SBUS::SBUS(HardwareSerial& bus){
+    _bus = &bus;
 }
 
 /* starts the serial communication */
 void SBUS::begin(){
-
 	// initialize parsing state
 	_fpos = 0;
-
-	// select the serial port
-	#if defined(__MK20DX128__) || defined(__MK20DX256__) ||  defined(__MKL26Z64__) // Teensy 3.0 || Teensy 3.1/3.2 || Teensy LC
-
-		if(_bus == 3){
-			_port = &Serial3;
-		}
-		else if(_bus == 2){
-			_port = &Serial2;
-		}
-		else{
-			_port = &Serial1;
-		}
-
-	#endif
-
-	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) // Teensy 3.5 || Teensy 3.6
-
-		if(_bus == 6){
-			_port = &Serial6;
-		}
-		else if(_bus == 5){
-			_port = &Serial5;
-		}
-		else if(_bus == 4){
-			_port = &Serial4;
-		}
-		else if(_bus == 3){
-			_port = &Serial3;
-		}
-		else if(_bus == 2){
-			_port = &Serial2;
-		}
-		else{
-			_port = &Serial1;
-		}
-
-	#endif
-
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		// begin the serial port for SBUS
-		_port->begin(100000,SERIAL_8E1_RXINV_TXINV);
-		SERIALPORT = _port;
+		_bus->begin(100000,SERIAL_8E1_RXINV_TXINV);
+		SERIALPORT = _bus;
 	#endif
 
 	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC 
 		// begin the serial port for SBUS
-		_port->begin(100000,SERIAL_8E2_RXINV_TXINV);
+		_bus->begin(100000,SERIAL_8E2_RXINV_TXINV);
 	#endif
 }
 
@@ -175,9 +135,9 @@ bool SBUS::parse(){
     if(sbusTime > SBUS_TIMEOUT){_fpos = 0;}
 
   	// see if serial data is available
-  	while(_port->available() > 0){
+  	while(_bus->available() > 0){
         sbusTime = 0;
-    	uint8_t c = _port->read();
+    	uint8_t c = _bus->read();
 
     	// find the header
     	if(_fpos == 0){
@@ -264,7 +224,7 @@ void SBUS::write(uint16_t* channels){
 
 	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC
 		// write packet
-		_port->write(packet,25);
+		_bus->write(packet,25);
 	#endif
 }
 

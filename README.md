@@ -33,11 +33,11 @@ Simply clone or download and extract the zipped library into your Arduino/librar
 
 Bind your SBUS capable receiver to your transmitter. Setup your SBUS capable servos by programming each with a unique channel number.
 
-**SBUS(uint8_t bus)**
+**SBUS(HardwareSerial& bus)**
 A SBUS object should be declared, specifying the hardware serial port the SBUS receiver and servos are connected to. For example, the following code declares a SBUS object called *x8r* located on the Teensy hardware serial port 1:
 
 ```C++
-SBUS x8r(1);
+SBUS x8r(Serial1);
 ```
 
 **void begin()**

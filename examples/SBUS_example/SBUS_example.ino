@@ -37,7 +37,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 // a SBUS object, which is on Teensy hardware
 // serial port 1
-SBUS x8r(1);
+SBUS x8r(Serial1);
 
 // channel, fail safe, and lost frames data
 uint16_t channels[16];
