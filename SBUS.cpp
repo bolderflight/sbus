@@ -136,12 +136,14 @@ bool SBUS::parse(){
 
   	// see if serial data is available
   	while(_bus->available() > 0){
-        sbusTime = 0;
-    	uint8_t c = _bus->read();
+      sbusTime = 0;
+    	static uint8_t c;
+      static uint8_t b;
+      c = _bus->read();
 
     	// find the header
     	if(_fpos == 0){
-      		if(c == _sbusHeader){
+      		if((c == _sbusHeader)&&((b == _sbusFooter)||((b & 0x0F) == _sbus2Footer))){
         		_fpos++;
       		}
       		else{
@@ -168,6 +170,7 @@ bool SBUS::parse(){
       			}
     		}
     	}
+      b = c;
   	}
   	// return false if a partial packet
   	return false;
