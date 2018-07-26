@@ -1,5 +1,5 @@
 # SBUS
-Library for communicating with SBUS receivers and servos using Teensy 3.x and Teensy LC devices.
+Arduino library for communicating with SBUS receivers and servos. SBUS uses inverted serial logic with a baud rate of 100000, 8 data bits, even parity bit, and 2 stop bits. This library works with Teensy 3.x and LC devices, the [STM32L4](https://github.com/simondlevy/grumpyoldpizza), and the Maple Mini. If you have other Arduino devices or port this library, I would appreciate getting pull requests to update this to work with as many devices as possible.
 
 # Description
 SBUS is a protocol for RC receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single signal line can be connected up to 16 servos with each receiving a unique command. SBUS capable servos are required; each can be programmed with a unique address (Channel 0 - 15) using an SBUS servo programmer. Advantages of SBUS include the reduction of wiring clutter and ease of parsing commands from RC receivers.
@@ -27,8 +27,6 @@ This library has two basic modes of functionality:
 This library has been tested using FrSky SBUS capable receivers (X8R and X4R) and FrSky SBUS capable servos (D25MA). Feedback from users, especially with other brand receivers and servos (i.e. Futaba), would be greatly appreciated.
 
 # Usage
-This library uses the [hardware serial](https://www.pjrc.com/teensy/td_uart.html) for Teensy devices. Additionally, this library [**requires Teensyduino 1.30 or above**](https://www.pjrc.com/teensy/td_download.html).
-
 Simply clone or download and extract the zipped library into your Arduino/libraries folder.
 
 Bind your SBUS capable receiver to your transmitter. Setup your SBUS capable servos by programming each with a unique channel number.
