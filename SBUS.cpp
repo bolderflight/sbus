@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 // Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC  || STM32L4 || Maple Mini
 #if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || \
-	defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__arm__) || (_BOARD_MAPLE_MINI_H_)
+	defined(__MK66FX1M0__) || defined(__MKL26Z64__) || \
+	defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || \
+	defined(_BOARD_MAPLE_MINI_H_)
 
 #include "Arduino.h"
 #include "SBUS.h"
@@ -57,7 +59,7 @@ void SBUS::begin(){
 		_bus->begin(100000,SERIAL_8E2_RXINV_TXINV);
 	#endif
 
-	#if defined(__arm__) && !defined(_BOARD_MAPLE_MINI_H_)  // STM32L4
+	#if defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		// begin the serial port for SBUS
 		_bus->begin(100000,SERIAL_SBUS);
   #endif
@@ -141,8 +143,8 @@ bool SBUS::parse(){
 
   	// see if serial data is available
   	while(_bus->available() > 0){
-      sbusTime = 0;
-			startTime = _curTime;
+      _sbusTime = 0;
+			_startTime = _curTime;
     	static uint8_t c;
       static uint8_t b;
       c = _bus->read();
@@ -231,7 +233,7 @@ void SBUS::write(uint16_t* channels){
 		serialTimer.begin(sendByte,130);
 	#endif
 
-	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__arm__) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
+	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
 		// write packet
 		_bus->write(packet,25);
 	#endif
