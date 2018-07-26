@@ -2,7 +2,6 @@
 SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
-2017-01-13
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -22,9 +21,9 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC 
+// Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC  || STM32L4 || Maple Mini
 #if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || \
-	defined(__MK66FX1M0__) || defined(__MKL26Z64__)
+	defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__arm__) || (_BOARD_MAPLE_MINI_H_)
 
 #include "Arduino.h"
 #include "SBUS.h"
@@ -57,27 +56,32 @@ void SBUS::begin(){
 		// begin the serial port for SBUS
 		_bus->begin(100000,SERIAL_8E2_RXINV_TXINV);
 	#endif
+
+	#if defined(__arm__) && !defined(_BOARD_MAPLE_MINI_H_)  // STM32L4
+		// begin the serial port for SBUS
+		_bus->begin(100000,SERIAL_SBUS);
+  #endif
+
+	#if defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
+		// begin the serial port for SBUS
+		_bus->begin(100000,SERIAL_8E2);
+	#endif
 }
 
 /* read the SBUS data and calibrate it to +/- 1 */
 bool SBUS::readCal(float* calChannels, uint8_t* failsafe, uint16_t* lostFrames){
 	uint16_t channels[16];
-
 	// read the SBUS data
 	if(read(&channels[0],failsafe,lostFrames)){
-
 		// linear calibration
-    	for(uint8_t i = 0; i < 16; i++){
-      		calChannels[i] = channels[i] * _sbusScale + _sbusBias;
-    	}
-
-    	// return true on receiving a full packet
-    	return true;
-  	}
-  	else{
-
-    	// return false if a full packet is not received
-    	return false;
+		for(uint8_t i = 0; i < 16; i++){
+				calChannels[i] = channels[i] * _sbusScale + _sbusBias;
+		}
+		// return true on receiving a full packet
+		return true;
+  } else {
+		// return false if a full packet is not received
+		return false;
   }
 }
 
@@ -130,13 +134,15 @@ bool SBUS::read(uint16_t* channels, uint8_t* failsafe, uint16_t* lostFrames){
 
 /* parse the SBUS data */
 bool SBUS::parse(){
-    static elapsedMicros sbusTime = 0;
-
-    if(sbusTime > SBUS_TIMEOUT){_fpos = 0;}
+		static uint32_t _startTime = micros();
+		_curTime = micros();
+		_sbusTime = _curTime - _startTime;
+    if(_sbusTime > SBUS_TIMEOUT){_fpos = 0;}
 
   	// see if serial data is available
   	while(_bus->available() > 0){
       sbusTime = 0;
+			startTime = _curTime;
     	static uint8_t c;
       static uint8_t b;
       c = _bus->read();
@@ -225,7 +231,7 @@ void SBUS::write(uint16_t* channels){
 		serialTimer.begin(sendByte,130);
 	#endif
 
-	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC
+	#if defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__arm__) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
 		// write packet
 		_bus->write(packet,25);
 	#endif
