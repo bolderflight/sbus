@@ -2,7 +2,6 @@
 SBUS_example.ino
 Brian R Taylor
 brian.taylor@bolderflight.com
-2016-09-21
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -35,14 +34,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "SBUS.h"
 
-// a SBUS object, which is on Teensy hardware
+// a SBUS object, which is on hardware
 // serial port 1
 SBUS x8r(Serial1);
 
 // channel, fail safe, and lost frames data
 uint16_t channels[16];
-uint8_t failSafe;
-uint16_t lostFrames = 0;
+bool failSafe;
+bool lostFrame;
 
 void setup() {
   // begin the SBUS communication
@@ -52,7 +51,7 @@ void setup() {
 void loop() {
 
   // look for a good SBUS packet from the receiver
-  if(x8r.read(&channels[0], &failSafe, &lostFrames)){
+  if(x8r.read(&channels[0], &failSafe, &lostFrame)){
 
     // write the SBUS packet to an SBUS compatible servo
     x8r.write(&channels[0]);

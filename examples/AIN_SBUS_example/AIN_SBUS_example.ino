@@ -2,7 +2,6 @@
 SBUS_example.ino
 Brian R Taylor
 brian.taylor@bolderflight.com
-2017-01-13
 
 Copyright (c) 2016 Bolder Flight Systems
 
@@ -29,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 #include <TimerOne.h>
 #include "SBUS.h"
 
-// a SBUS object, which is on Teensy hardware
+// a SBUS object, which is on hardware
 // serial port 1
 SBUS x8r(Serial1);
 
@@ -42,14 +41,14 @@ void setup() {
 	Serial.begin(115200);
 
 	// begin the SBUS communication
-  	x8r.begin();
+	x8r.begin();
 
-  	// setup the analog read resolution to 16 bits
-  	analogReadResolution(16);
+	// setup the analog read resolution to 16 bits
+	analogReadResolution(16);
 
-  	// setup an interrupt to send packets every 9 ms
-  	Timer1.initialize(9000);
-  	Timer1.attachInterrupt(sendSBUS);
+	// setup an interrupt to send packets every 9 ms
+	Timer1.initialize(9000);
+	Timer1.attachInterrupt(sendSBUS);
 }
 
 void loop() {
@@ -63,20 +62,20 @@ void sendSBUS() {
 	uint16_t channels[16];
 
 	// read the analog inputs
-  	for(uint8_t i = 14; i < 24; i++) {
-  		ain[i-14] = analogRead(i);
-  	}
+	for(uint8_t i = 14; i < 24; i++) {
+		ain[i-14] = analogRead(i);
+	}
 
-  	// linearly map the analog measurements (0-65535)
-  	// to the SBUS commands (172-1811)
-  	for(uint8_t i = 0; i < 10; i++) {
-  		channels[i] = (uint16_t)(((float)ain[i]) * scaleFactor + bias);
-  		Serial.print(channels[i]); // print the channel command (172-1811)
-  		Serial.print("\t");
-  	}
-  	Serial.println();
+	// linearly map the analog measurements (0-65535)
+	// to the SBUS commands (172-1811)
+	for(uint8_t i = 0; i < 10; i++) {
+		channels[i] = (uint16_t)(((float)ain[i]) * scaleFactor + bias);
+		Serial.print(channels[i]); // print the channel command (172-1811)
+		Serial.print("\t");
+	}
+	Serial.println();
 
 	// write the SBUS packet to an SBUS compatible servo
-    x8r.write(&channels[0]);
+  x8r.write(&channels[0]);
 }
 
