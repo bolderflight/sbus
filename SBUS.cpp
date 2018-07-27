@@ -42,35 +42,21 @@ void SBUS::begin()
 {
 	// initialize parsing state
 	_parserState = 0;
+	// initialize default scale factors and biases
+	for (uint8_t i = 0; i < _numChannels; i++) {
+		setEndPoints(i,_defaultMin,_defaultMax);
+	}
 	// begin the serial port for SBUS
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
-		_bus->begin(100000,SERIAL_8E1_RXINV_TXINV);
+		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
 	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC 
-		_bus->begin(100000,SERIAL_8E2_RXINV_TXINV);
+		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
-		_bus->begin(100000,SERIAL_SBUS);
+		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
-		_bus->begin(100000,SERIAL_8E2);
+		_bus->begin(_sbusBaud,SERIAL_8E2);
 	#endif
-}
-
-/* read the SBUS data and calibrate it to +/- 1 */
-bool SBUS::readCal(float* calChannels, bool* failsafe, bool* lostFrame)
-{
-	uint16_t channels[16];
-	// read the SBUS data
-	if(read(&channels[0],failsafe,lostFrame)) {
-		// linear calibration
-		for (uint8_t i = 0; i < 16; i++) {
-			calChannels[i] = channels[i] * _sbusScale + _sbusBias;
-		}
-		// return true on receiving a full packet
-		return true;
-  } else {
-		// return false if a full packet is not received
-		return false;
-  }
 }
 
 /* read the SBUS data */
@@ -122,72 +108,25 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 	}
 }
 
-/* parse the SBUS data */
-bool SBUS::parse() 
+/* read the SBUS data and calibrate it to +/- 1 */
+bool SBUS::readCal(float* calChannels, bool* failsafe, bool* lostFrame)
 {
-	// reset the parser state if too much time has passed
-	static elapsedMicros _sbusTime = 0;
-	if (_sbusTime > SBUS_TIMEOUT_US) {_parserState = 0;}
-	// see if serial data is available
-	while (_bus->available() > 0) {
-		_sbusTime = 0;
-		_curByte = _bus->read();
-		// find the header
-		if (_parserState == 0) {
-				if ((_curByte == _sbusHeader) && ((_prevByte == _sbusFooter) || ((_prevByte & _sbus2Mask) == _sbus2Footer))) {
-					_parserState++;
-				} else {
-					_parserState = 0;
-				}
-		} else {
-			// strip off the data
-			if ((_parserState-1) < _payloadSize) {
-				_payload[_parserState-1] = _curByte;
-				_parserState++;
-			}
-			// check the end byte
-			if ((_parserState-1) == _payloadSize) {
-				if ((_curByte == _sbusFooter) || ((_curByte & _sbus2Mask) == _sbus2Footer)) {
-					_parserState = 0;
-					return true;
-				} else {
-					_parserState = 0;
-					return false;
-				}
+	uint16_t channels[_numChannels];
+	// read the SBUS data
+	if(read(&channels[0],failsafe,lostFrame)) {
+		// linear calibration
+		for (uint8_t i = 0; i < _numChannels; i++) {
+			calChannels[i] = channels[i] * _sbusScale[i] + _sbusBias[i];
+			if (_useReadCoeff[i]) {
+				calChannels[i] = PolyVal(_readLen[i],_readCoeff[i],calChannels[i]);
 			}
 		}
-		_prevByte = _curByte;
-	}
-	// return false if a partial packet
-	return false;
-}
-
-void SBUS::setMin(uint16_t min)
-{
-	_sbusMin = min;
-	scaleBias();
-}
-
-void SBUS::setMax(uint16_t max)
-{
-	_sbusMax = max;
-	scaleBias();	
-}
-
-uint16_t SBUS::getMin()
-{
-	return _sbusMin;
-}
-
-uint16_t SBUS::getMax()
-{
-	return _sbusMax;
-}
-
-void SBUS::scaleBias()
-{
-	_sbusScale = 2.0f / (_sbusMax - _sbusMin);
-	_sbusBias = (_sbusMin + (_sbusMax - _sbusMin) / 2.0f) * _sbusScale;
+		// return true on receiving a full packet
+		return true;
+  } else {
+		// return false if a full packet is not received
+		return false;
+  }
 }
 
 /* write SBUS packets */
@@ -236,6 +175,124 @@ void SBUS::write(uint16_t* channels)
 		// write packet
 		_bus->write(packet,25);
 	#endif
+}
+
+/* write SBUS packets from calibrated inputs */
+void SBUS::writeCal(float* calChannels)
+{
+	uint16_t channels[_numChannels];
+	// linear calibration
+	for (uint8_t i = 0; i < _numChannels; i++) {
+		if (_useWriteCoeff[i]) {
+			calChannels[i] = PolyVal(_writeLen[i],_writeCoeff[i],calChannels[i]);
+		}
+		channels[i] = (calChannels[i] - _sbusBias[i])  / _sbusScale[i];
+	}
+    Serial.print(channels[3]);
+    Serial.print("\t");
+    Serial.println(channels[4]);
+	write(channels);
+}
+
+void SBUS::setEndPoints(uint8_t channel,uint16_t min,uint16_t max)
+{
+	_sbusMin[channel] = min;
+	_sbusMax[channel] = max;
+	scaleBias(channel);
+}
+
+void SBUS::getEndPoints(uint8_t channel,uint16_t *min,uint16_t *max)
+{
+	*min = _sbusMin[channel];
+	*max = _sbusMax[channel];
+}
+
+void SBUS::setReadCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (!_readCoeff) {
+		_readCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+	}
+	_readCoeff[channel] = (float*) malloc(sizeof(float)*len);
+	for (uint8_t i = 0; i < len; i++) {
+		_readCoeff[channel][i] = coeff[i];
+	}
+	_readLen[channel] = len;
+	_useReadCoeff[channel] = true;
+}
+
+void SBUS::setWriteCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (!_writeCoeff) {
+		_writeCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+	}
+	_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
+	for (uint8_t i = 0; i < len; i++) {
+		_writeCoeff[channel][i] = coeff[i];
+	}
+	_writeLen[channel] = len;
+	_useWriteCoeff[channel] = true;
+}
+
+/* destructor, free dynamically allocated memory */
+SBUS::~SBUS()
+{
+	if (_readCoeff) {free(_readCoeff);}
+	if (_writeCoeff) {free(_writeCoeff);}
+}
+
+/* parse the SBUS data */
+bool SBUS::parse() 
+{
+	// reset the parser state if too much time has passed
+	static elapsedMicros _sbusTime = 0;
+	if (_sbusTime > SBUS_TIMEOUT_US) {_parserState = 0;}
+	// see if serial data is available
+	while (_bus->available() > 0) {
+		_sbusTime = 0;
+		_curByte = _bus->read();
+		// find the header
+		if (_parserState == 0) {
+				if ((_curByte == _sbusHeader) && ((_prevByte == _sbusFooter) || ((_prevByte & _sbus2Mask) == _sbus2Footer))) {
+					_parserState++;
+				} else {
+					_parserState = 0;
+				}
+		} else {
+			// strip off the data
+			if ((_parserState-1) < _payloadSize) {
+				_payload[_parserState-1] = _curByte;
+				_parserState++;
+			}
+			// check the end byte
+			if ((_parserState-1) == _payloadSize) {
+				if ((_curByte == _sbusFooter) || ((_curByte & _sbus2Mask) == _sbus2Footer)) {
+					_parserState = 0;
+					return true;
+				} else {
+					_parserState = 0;
+					return false;
+				}
+			}
+		}
+		_prevByte = _curByte;
+	}
+	// return false if a partial packet
+	return false;
+}
+
+/* compute scale factor and bias from end points */
+void SBUS::scaleBias(uint8_t channel)
+{
+	_sbusScale[channel] = 2.0f / ((float)_sbusMax[channel] - (float)_sbusMin[channel]);
+	_sbusBias[channel] = -1.0f*((float)_sbusMin[channel] + ((float)_sbusMax[channel] - (float)_sbusMin[channel]) / 2.0f) * _sbusScale[channel];
+}
+
+float SBUS::PolyVal(size_t PolySize, float *Coefficients, float X) {
+  float Y = Coefficients[0];
+  for (uint8_t i = 1; i < PolySize; i++) {
+    Y = Y*X + Coefficients[i];
+  }
+  return(Y);
 }
 
 // function to send byte at a time with

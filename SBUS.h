@@ -45,11 +45,16 @@ class SBUS{
 		bool readCal(float* calChannels, bool* failsafe, bool* lostFrame);
 		void write(uint16_t* channels);
 		void writeCal(float *channels);
-		void setMin(uint16_t min);
-		void setMax(uint16_t max);
-		uint16_t getMin();
-		uint16_t getMax();
+		void setEndPoints(uint8_t channel,uint16_t min,uint16_t max);
+		void getEndPoints(uint8_t channel,uint16_t *min,uint16_t *max);
+		void setReadCal(uint8_t channel,float *coeff,uint8_t len);
+		void getReadCal(uint8_t channel,float *coeff,uint8_t len);
+		void setWriteCal(uint8_t channel,float *coeff,uint8_t len);
+		void getWriteCal(uint8_t channel,float *coeff,uint8_t len);
+		~SBUS();
   private:
+		const uint32_t _sbusBaud = 100000;
+		static const uint8_t _numChannels = 16;
 		const uint8_t _sbusHeader = 0x0F;
 		const uint8_t _sbusFooter = 0x00;
 		const uint8_t _sbus2Footer = 0x04;
@@ -58,15 +63,21 @@ class SBUS{
 		uint8_t _parserState, _prevByte = _sbusFooter, _curByte;
 		static const uint8_t _payloadSize = 24;
 		uint8_t _payload[_payloadSize];		
-		float _sbusScale = 0.00122025625f;
-		float _sbusBias = -1.2098840f;
 		const uint8_t _sbusLostFrame = 0x04;
 		const uint8_t _sbusFailSafe = 0x08;
-		const uint16_t _sbusMin = 172;
-		const uint16_t _sbusMax = 1811;
+		const uint16_t _defaultMin = 172;
+		const uint16_t _defaultMax = 1811;
+		uint16_t _sbusMin[_numChannels];
+		uint16_t _sbusMax[_numChannels];
+		float _sbusScale[_numChannels];
+		float _sbusBias[_numChannels];
+		float **_readCoeff, **_writeCoeff;
+		uint8_t _readLen[_numChannels],_writeLen[_numChannels];
+		bool _useReadCoeff[_numChannels], _useWriteCoeff[_numChannels];
 		HardwareSerial* _bus;
 		bool parse();
-		void scaleBias();
+		void scaleBias(uint8_t channel);
+		float PolyVal(size_t PolySize, float *Coefficients, float X);
 };
 
 #endif
