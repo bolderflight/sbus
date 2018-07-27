@@ -45,6 +45,10 @@ class SBUS{
 		bool readCal(float* calChannels, bool* failsafe, bool* lostFrame);
 		void write(uint16_t* channels);
 		void writeCal(float *channels);
+		void setMin(uint16_t min);
+		void setMax(uint16_t max);
+		uint16_t getMin();
+		uint16_t getMax();
   private:
 		const uint8_t _sbusHeader = 0x0F;
 		const uint8_t _sbusFooter = 0x00;
@@ -62,6 +66,7 @@ class SBUS{
 		const uint16_t _sbusMax = 1811;
 		HardwareSerial* _bus;
 		bool parse();
+		void scaleBias();
 };
 
 #endif

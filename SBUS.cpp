@@ -162,6 +162,34 @@ bool SBUS::parse()
 	return false;
 }
 
+void SBUS::setMin(uint16_t min)
+{
+	_sbusMin = min;
+	scaleBias();
+}
+
+void SBUS::setMax(uint16_t max)
+{
+	_sbusMax = max;
+	scaleBias();	
+}
+
+uint16_t SBUS::getMin()
+{
+	return _sbusMin;
+}
+
+uint16_t SBUS::getMax()
+{
+	return _sbusMax;
+}
+
+void SBUS::scaleBias()
+{
+	_sbusScale = 2.0f / (_sbusMax - _sbusMin);
+	_sbusBias = (_sbusMin + (_sbusMax - _sbusMin) / 2.0f) * _sbusScale;
+}
+
 /* write SBUS packets */
 void SBUS::write(uint16_t* channels)
 {
