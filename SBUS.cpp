@@ -137,28 +137,30 @@ void SBUS::write(uint16_t* channels)
 	// SBUS header
 	packet[0] = _sbusHeader; 
 	// 16 channels of 11 bit data
-	packet[1] = (uint8_t) ((channels[0] & 0x07FF));
-	packet[2] = (uint8_t) ((channels[0] & 0x07FF)>>8 | (channels[1] & 0x07FF)<<3);
-	packet[3] = (uint8_t) ((channels[1] & 0x07FF)>>5 | (channels[2] & 0x07FF)<<6);
-	packet[4] = (uint8_t) ((channels[2] & 0x07FF)>>2);
-	packet[5] = (uint8_t) ((channels[2] & 0x07FF)>>10 | (channels[3] & 0x07FF)<<1);
-	packet[6] = (uint8_t) ((channels[3] & 0x07FF)>>7 | (channels[4] & 0x07FF)<<4);
-	packet[7] = (uint8_t) ((channels[4] & 0x07FF)>>4 | (channels[5] & 0x07FF)<<7);
-	packet[8] = (uint8_t) ((channels[5] & 0x07FF)>>1);
-	packet[9] = (uint8_t) ((channels[5] & 0x07FF)>>9 | (channels[6] & 0x07FF)<<2);
-	packet[10] = (uint8_t) ((channels[6] & 0x07FF)>>6 | (channels[7] & 0x07FF)<<5);
-	packet[11] = (uint8_t) ((channels[7] & 0x07FF)>>3);
-	packet[12] = (uint8_t) ((channels[8] & 0x07FF));
-	packet[13] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
-	packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);  
-	packet[15] = (uint8_t) ((channels[10] & 0x07FF)>>2);
-	packet[16] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
-	packet[17] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
-	packet[18] = (uint8_t) ((channels[12] & 0x07FF)>>4 | (channels[13] & 0x07FF)<<7);
-	packet[19] = (uint8_t) ((channels[13] & 0x07FF)>>1);
-	packet[20] = (uint8_t) ((channels[13] & 0x07FF)>>9 | (channels[14] & 0x07FF)<<2);
-	packet[21] = (uint8_t) ((channels[14] & 0x07FF)>>6 | (channels[15] & 0x07FF)<<5);
-	packet[22] = (uint8_t) ((channels[15] & 0x07FF)>>3);
+	if (channels) {
+		packet[1] = (uint8_t) ((channels[0] & 0x07FF));
+		packet[2] = (uint8_t) ((channels[0] & 0x07FF)>>8 | (channels[1] & 0x07FF)<<3);
+		packet[3] = (uint8_t) ((channels[1] & 0x07FF)>>5 | (channels[2] & 0x07FF)<<6);
+		packet[4] = (uint8_t) ((channels[2] & 0x07FF)>>2);
+		packet[5] = (uint8_t) ((channels[2] & 0x07FF)>>10 | (channels[3] & 0x07FF)<<1);
+		packet[6] = (uint8_t) ((channels[3] & 0x07FF)>>7 | (channels[4] & 0x07FF)<<4);
+		packet[7] = (uint8_t) ((channels[4] & 0x07FF)>>4 | (channels[5] & 0x07FF)<<7);
+		packet[8] = (uint8_t) ((channels[5] & 0x07FF)>>1);
+		packet[9] = (uint8_t) ((channels[5] & 0x07FF)>>9 | (channels[6] & 0x07FF)<<2);
+		packet[10] = (uint8_t) ((channels[6] & 0x07FF)>>6 | (channels[7] & 0x07FF)<<5);
+		packet[11] = (uint8_t) ((channels[7] & 0x07FF)>>3);
+		packet[12] = (uint8_t) ((channels[8] & 0x07FF));
+		packet[13] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
+		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);  
+		packet[15] = (uint8_t) ((channels[10] & 0x07FF)>>2);
+		packet[16] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
+		packet[17] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
+		packet[18] = (uint8_t) ((channels[12] & 0x07FF)>>4 | (channels[13] & 0x07FF)<<7);
+		packet[19] = (uint8_t) ((channels[13] & 0x07FF)>>1);
+		packet[20] = (uint8_t) ((channels[13] & 0x07FF)>>9 | (channels[14] & 0x07FF)<<2);
+		packet[21] = (uint8_t) ((channels[14] & 0x07FF)>>6 | (channels[15] & 0x07FF)<<5);
+		packet[22] = (uint8_t) ((channels[15] & 0x07FF)>>3);
+	}
 	// flags
 	packet[23] = 0x00;
 	// footer
@@ -180,17 +182,16 @@ void SBUS::write(uint16_t* channels)
 /* write SBUS packets from calibrated inputs */
 void SBUS::writeCal(float* calChannels)
 {
-	uint16_t channels[_numChannels];
+	uint16_t channels[_numChannels] = {0};
 	// linear calibration
-	for (uint8_t i = 0; i < _numChannels; i++) {
-		if (_useWriteCoeff[i]) {
-			calChannels[i] = PolyVal(_writeLen[i],_writeCoeff[i],calChannels[i]);
+	if (calChannels) {
+		for (uint8_t i = 0; i < _numChannels; i++) {
+			if (_useWriteCoeff[i]) {
+				calChannels[i] = PolyVal(_writeLen[i],_writeCoeff[i],calChannels[i]);
+			}
+			channels[i] = (calChannels[i] - _sbusBias[i])  / _sbusScale[i];
 		}
-		channels[i] = (calChannels[i] - _sbusBias[i])  / _sbusScale[i];
 	}
-    Serial.print(channels[3]);
-    Serial.print("\t");
-    Serial.println(channels[4]);
 	write(channels);
 }
 
@@ -203,41 +204,89 @@ void SBUS::setEndPoints(uint8_t channel,uint16_t min,uint16_t max)
 
 void SBUS::getEndPoints(uint8_t channel,uint16_t *min,uint16_t *max)
 {
-	*min = _sbusMin[channel];
-	*max = _sbusMax[channel];
+	if (min&&max) {
+		*min = _sbusMin[channel];
+		*max = _sbusMax[channel];
+	}
 }
 
 void SBUS::setReadCal(uint8_t channel,float *coeff,uint8_t len)
 {
-	if (!_readCoeff) {
-		_readCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+	if (coeff) {
+		if (!_readCoeff) {
+			_readCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+		}
+		if (!_readCoeff[channel]) {
+			_readCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		} else {
+			free(_readCoeff[channel]);
+			_readCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		}
+		for (uint8_t i = 0; i < len; i++) {
+			_readCoeff[channel][i] = coeff[i];
+		}
+		_readLen[channel] = len;
+		_useReadCoeff[channel] = true;
 	}
-	_readCoeff[channel] = (float*) malloc(sizeof(float)*len);
-	for (uint8_t i = 0; i < len; i++) {
-		_readCoeff[channel][i] = coeff[i];
+}
+
+void SBUS::getReadCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (coeff) {
+		for (uint8_t i = 0; (i < _readLen[channel]) && (i < len); i++) {
+			coeff[i] = _readCoeff[channel][i];
+		}
 	}
-	_readLen[channel] = len;
-	_useReadCoeff[channel] = true;
 }
 
 void SBUS::setWriteCal(uint8_t channel,float *coeff,uint8_t len)
 {
-	if (!_writeCoeff) {
-		_writeCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+	if (coeff) {
+		if (!_writeCoeff) {
+			_writeCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+		}
+		if (!_writeCoeff[channel]) {
+			_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		} else {
+			free(_writeCoeff[channel]);
+			_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		}
+		for (uint8_t i = 0; i < len; i++) {
+			_writeCoeff[channel][i] = coeff[i];
+		}
+		_writeLen[channel] = len;
+		_useWriteCoeff[channel] = true;
 	}
-	_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
-	for (uint8_t i = 0; i < len; i++) {
-		_writeCoeff[channel][i] = coeff[i];
+}
+
+void SBUS::getWriteCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (coeff) {
+		for (uint8_t i = 0; (i < _writeLen[channel]) && (i < len); i++) {
+			coeff[i] = _writeCoeff[channel][i];
+		}
 	}
-	_writeLen[channel] = len;
-	_useWriteCoeff[channel] = true;
 }
 
 /* destructor, free dynamically allocated memory */
 SBUS::~SBUS()
 {
-	if (_readCoeff) {free(_readCoeff);}
-	if (_writeCoeff) {free(_writeCoeff);}
+	if (_readCoeff) {
+		for (uint8_t i = 0; i < _numChannels; i++) {
+			if (_readCoeff[i]) {
+				free(_readCoeff[i]);
+			}
+		}
+		free(_readCoeff);
+	}
+	if (_writeCoeff) {
+		for (uint8_t i = 0; i < _numChannels; i++) {
+			if (_writeCoeff[i]) {
+				free(_writeCoeff[i]);
+			}
+		}
+		free(_writeCoeff);
+	}
 }
 
 /* parse the SBUS data */
@@ -288,11 +337,15 @@ void SBUS::scaleBias(uint8_t channel)
 }
 
 float SBUS::PolyVal(size_t PolySize, float *Coefficients, float X) {
-  float Y = Coefficients[0];
-  for (uint8_t i = 1; i < PolySize; i++) {
-    Y = Y*X + Coefficients[i];
-  }
-  return(Y);
+	if (Coefficients) {
+		float Y = Coefficients[0];
+		for (uint8_t i = 1; i < PolySize; i++) {
+			Y = Y*X + Coefficients[i];
+		}
+		return(Y);
+	} else {
+		return 0;
+	}
 }
 
 // function to send byte at a time with
