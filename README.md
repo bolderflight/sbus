@@ -1,6 +1,10 @@
 # SBUS
 Arduino library for communicating with SBUS receivers and servos. SBUS uses inverted serial logic with a baud rate of 100000, 8 data bits, even parity bit, and 2 stop bits. This library works with Teensy 3.x and LC devices, the [STM32L4](https://github.com/simondlevy/grumpyoldpizza), and the Maple Mini. If you have other Arduino devices or port this library, I would appreciate pull requests to update this to work with as many devices as possible.
 
+# Using SBUS on ESP32
+ESP32 need logic level converter 5v to 3.3v. ( https://www.adafruit.com/product/757 )
+To use uninverted sbus frsky signal pin, can refer to oscarliang article (https://oscarliang.com/uninverted-sbus-smart-port-frsky-receivers/)
+
 # Description
 SBUS is a protocol for RC receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single signal line can be connected up to 16 servos with each receiving a unique command. SBUS capable servos are required; each can be programmed with a unique address (Channel 0 - 15) using an SBUS servo programmer. Advantages of SBUS include the reduction of wiring clutter and ease of parsing commands from RC receivers.
 

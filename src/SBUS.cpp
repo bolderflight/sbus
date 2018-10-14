@@ -56,6 +56,8 @@ void SBUS::begin()
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
+	#elif defined(ESP32)                // ESP32
+        	_bus->begin(_sbusBaud,SERIAL_8E2);
 	#endif
 }
 
