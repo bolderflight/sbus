@@ -1,6 +1,8 @@
 # SBUS
 Arduino library for communicating with SBUS receivers and servos. SBUS uses inverted serial logic with a baud rate of 100000, 8 data bits, even parity bit, and 2 stop bits. This library works with Teensy 3.x and LC devices, the [STM32L4](https://github.com/simondlevy/grumpyoldpizza), the Maple Mini, and ESP32 (see below). If you have other Arduino devices or port this library, I would appreciate pull requests to update this to work with as many devices as possible.
 
+***Developing with the [Teensy 3.2](https://www.pjrc.com/store/teensy32.html) or [LC](https://www.pjrc.com/store/teensylc.html)? Consider buying our [Teensy SBUS Backpack](http://bolderflight.com/products/teensy/sbus/), which provides 8 SBUS outputs pinned to standard servo connectors with bussed power and ground, integrated in a stackable add-on module and thoughtfully designed to integrate perfectly with the Teensy. Check out all of our wonderfully small and powerful [Teensy Backpacks](http://bolderflight.com/products/teensy/)***
+
 ## Using SBUS on ESP32
 ESP32 may need a logic level converter from 5V to 3.3V.
 
