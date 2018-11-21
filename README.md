@@ -8,6 +8,13 @@ ESP32 may need a logic level converter from 5V to 3.3V.
 
 Additionally, to use uninverted sbus FrSky signal pin, please refer to [Oscar Liang's post](https://oscarliang.com/uninverted-sbus-smart-port-frsky-receivers/).
 
+## Using SBUS on Arduino Mega 2560
+Since SBUS uses inverted serial logic, you need to connect the receivers and servors through a signal inverter circuit as explained [here](https://dev.px4.io/en/tutorials/linux_sbus.html). Basically, you need to use an NPN transistor with the following connections:
+* connect SBUS signal to the base of the NPN transistor through a 1K resistor
+* connect GND of the Arduino board to the emitter of the transistor
+* connect Arduino operating voltage (5V for Mega 2560) to the collector of the transistor through a 10K resistor
+* connect RX port of the used Arduino serial port to the collector of the transistor
+
 # Description
 SBUS is a protocol for RC receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single signal line can be connected up to 16 servos with each receiving a unique command. SBUS capable servos are required; each can be programmed with a unique address (Channel 0 - 15) using an SBUS servo programmer. Advantages of SBUS include the reduction of wiring clutter and ease of parsing commands from RC receivers.
 
