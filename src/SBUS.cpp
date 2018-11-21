@@ -5,19 +5,19 @@ brian.taylor@bolderflight.com
 
 Copyright (c) 2016 Bolder Flight Systems
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
-and associated documentation files (the "Software"), to deal in the Software without restriction, 
-including without limitation the rights to use, copy, modify, merge, publish, distribute, 
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or 
+The above copyright notice and this permission notice shall be included in all copies or
 substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
@@ -50,15 +50,17 @@ void SBUS::begin()
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
-	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC 
+	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC
 		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
 	#elif defined(ESP32)                // ESP32
-        	_bus->begin(_sbusBaud,SERIAL_8E2);
-	#endif
+        _bus->begin(_sbusBaud,SERIAL_8E2);
+  #elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
+        _bus->begin(_sbusBaud, SERIAL_8E2);
+  #endif
 }
 
 /* read the SBUS data */
@@ -97,7 +99,7 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
     	// failsafe state
     	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = true;
-    	} 
+    	}
     	else{
       		*failsafe = false;
     	}
@@ -137,7 +139,7 @@ void SBUS::write(uint16_t* channels)
 	static uint8_t packet[25];
 	/* assemble the SBUS packet */
 	// SBUS header
-	packet[0] = _sbusHeader; 
+	packet[0] = _sbusHeader;
 	// 16 channels of 11 bit data
 	if (channels) {
 		packet[1] = (uint8_t) ((channels[0] & 0x07FF));
@@ -153,7 +155,7 @@ void SBUS::write(uint16_t* channels)
 		packet[11] = (uint8_t) ((channels[7] & 0x07FF)>>3);
 		packet[12] = (uint8_t) ((channels[8] & 0x07FF));
 		packet[13] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
-		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);  
+		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);
 		packet[15] = (uint8_t) ((channels[10] & 0x07FF)>>2);
 		packet[16] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
 		packet[17] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
@@ -168,7 +170,7 @@ void SBUS::write(uint16_t* channels)
 	// footer
 	packet[24] = _sbusFooter;
 	#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
-		// use ISR to send byte at a time, 
+		// use ISR to send byte at a time,
 		// 130 us between bytes to emulate 2 stop bits
 		noInterrupts();
 		memcpy(&PACKET,&packet,sizeof(packet));
@@ -292,7 +294,7 @@ SBUS::~SBUS()
 }
 
 /* parse the SBUS data */
-bool SBUS::parse() 
+bool SBUS::parse()
 {
 	// reset the parser state if too much time has passed
 	static elapsedMicros _sbusTime = 0;
