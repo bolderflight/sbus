@@ -50,7 +50,7 @@ void SBUS::begin()
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
-	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC
+	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 3.5 || Teensy 3.6 || Teensy LC
 		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
@@ -177,7 +177,7 @@ void SBUS::write(uint16_t* channels)
 		interrupts();
 		serialTimer.priority(255);
 		serialTimer.begin(sendByte,130);
-	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
+	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
 		// write packet
 		_bus->write(packet,25);
 	#endif
