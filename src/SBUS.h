@@ -29,12 +29,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 /*
 * Hardware Serial Supported:
-* Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC  || STM32L4 || Maple Mini || Arduino Mega 2560
+* Teensy 3.0 || Teensy 3.1/3.2 || Teensy 3.5 || Teensy 3.6 || Teensy LC  || STM32L4 || Maple Mini || Arduino Mega 2560 || ESP32
 */
 #if defined(__MK20DX128__) 	|| defined(__MK20DX256__) || defined(__MK64FX512__)	\
 	|| defined(__MK66FX1M0__) || defined(__MKL26Z64__) 	|| defined(__IMXRT1052__) \
 	|| defined(STM32L496xx)		|| defined(STM32L476xx) 	|| defined(STM32L433xx) \
-	|| defined(STM32L432xx)		|| defined(_BOARD_MAPLE_MINI_H_) || defined(__AVR_ATmega2560__)
+	|| defined(STM32L432xx)		|| defined(_BOARD_MAPLE_MINI_H_) \
+	|| defined(__AVR_ATmega2560__) || defined(ESP32)
 #endif
 
 class SBUS{
