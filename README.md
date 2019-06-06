@@ -1,4 +1,4 @@
-This gork of teh bolderflight/SBUS Arduino library adds a *readS()* function that returns signed integer values and associated *setMidPoint()* and *getMidPoint* functions.  Othwise teh information below is taken from the bolderflight repo.
+This fork of the bolderflight/SBUS Arduino library adds a *readS()* function that returns signed integer values and associated *setMidPoint()* and *getMidPoint* functions.  Othwise the information below is taken from the bolderflight repo (i.e. 'our' is not mine - it's theirs).
 
 # SBUS
 Arduino library for communicating with SBUS receivers and servos. SBUS uses inverted serial logic with a baud rate of 100000, 8 data bits, even parity bit, and 2 stop bits. This library works with Teensy 3.x and LC devices, the [STM32L4](https://github.com/simondlevy/grumpyoldpizza), the Maple Mini, and ESP32 (see below). If you have other Arduino devices or port this library, I would appreciate pull requests to update this to work with as many devices as possible.
