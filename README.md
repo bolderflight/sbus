@@ -72,6 +72,19 @@ if(x8r.read(&channels[0], &failSafe, &lostFrame)){
 }
 ```
 
+**bool readS(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)**
+*readS(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* duplicates teh behaviour of *read(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* except that *channels[0-15]* are returned as signed integer offset from a defined midpoint value (the function to modify these midpoints is described below). For example, placing the following code in the loop function will print the signed shifted value of *channel 0* every time a valid SBUS packet is received.
+
+```C++
+int16_t channels[16];
+bool failSafe;
+bool lostFrame;
+
+if(x8r.read(&channels[0], &failSafe, &lostFrame)){
+	Serial.println(channels[0]);
+}
+```
+
 **bool readCal(float&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)**
 *readCal(float&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* reads data from the SBUS receiver and parses the SBUS packet. The data from *channels[0-15]* is calibrated to a +/- 1.0 float value assuming a linear relationship based on the minimum and maximum value, or endpoints, for each channel. By default these are set to 172 and 1811, respectively, using FrSky set to 0-100%. The functions described below describe how to modify these endpoints. This is useful if you have endpoints setup differently in your transmitter, but would still like to map to a +/- 1.0 value. Following scaling based on endpoint values, the channels data can optionally be calibrated via polynomial evaluation. The functions described below describe how to setup these polynomials. This could be useful for cases where you would like to receive input data in terms of resulting control surface position for a fixed wing aircraft instead of +/- 1.0 scaled values.
 
@@ -124,6 +137,12 @@ This sets the endpoints for readCal and writeCal for the given channel number. B
 
 **void getEndPoints(uint8_t channel,uint16_t&ast; min,uint16_t&ast; max)**
 This method retrieves the endpoints for the given channel number.
+
+**void setMidPoint(uint8_t channel,uint16_t mid)**
+This sets the midpoint for readS for the given channel number. By default midpoints are set to 992.
+
+**void getMidPoint(uint8_t channel,uint16_t&ast; mid)**
+This method retrieves the midpoint for the given channel number.
 
 **void setReadCal(uint8_t channel,float&ast; coeff,uint8_t len)**
 This method sets a polynomial for the given channel used by the *readCal* method. The coefficients should be an array of length *len* given in descending order. For example, *float cal[2] = {2,0}* would apply a scale factor of two, with zero bias, to the *readCal* data from the given channel resulting in data ranging from +/- 2.0 instead of +/- 1.0.
