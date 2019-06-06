@@ -73,7 +73,7 @@ if(x8r.read(&channels[0], &failSafe, &lostFrame)){
 ```
 
 **bool readS(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)**
-*readS(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* duplicates teh behaviour of *read(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* except that *channels[0-15]* are returned as signed integer offset from a defined midpoint value (the function to modify these midpoints is described below). For example, placing the following code in the loop function will print the signed shifted value of *channel 0* every time a valid SBUS packet is received.
+*readS(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* duplicates the behaviour of *read(int16_t&ast; channels, bool&ast; failsafe, bool&ast; lostFrame)* except that *channels[0-15]* are now returned as signed integer offsets from a defined midpoint value (the function to modify these midpoints is described below). For example, placing the following code in the loop function will print the signed shifted value of *channel 0* every time a valid SBUS packet is received.
 
 ```C++
 int16_t channels[16];
