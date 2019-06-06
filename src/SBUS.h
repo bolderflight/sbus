@@ -5,6 +5,8 @@ brian.taylor@bolderflight.com
 
 Copyright (c) 2016 Bolder Flight Systems
 
+With readS and associated midpoint functions added by Ian Smith, ian@astounding.org.uk
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute,
@@ -42,11 +44,14 @@ class SBUS{
 		SBUS(HardwareSerial& bus);
 		void begin();
 		bool read(uint16_t* channels, bool* failsafe, bool* lostFrame);
+		bool readS(int16_t* channels, bool* failsafe, bool* lostFrame);
 		bool readCal(float* calChannels, bool* failsafe, bool* lostFrame);
 		void write(uint16_t* channels);
 		void writeCal(float *channels);
 		void setEndPoints(uint8_t channel,uint16_t min,uint16_t max);
 		void getEndPoints(uint8_t channel,uint16_t *min,uint16_t *max);
+		void setMidPoint(uint8_t channel,uint16_t mid);
+		void getMidPoint(uint8_t channel,uint16_t *mid);
 		void setReadCal(uint8_t channel,float *coeff,uint8_t len);
 		void getReadCal(uint8_t channel,float *coeff,uint8_t len);
 		void setWriteCal(uint8_t channel,float *coeff,uint8_t len);
@@ -67,8 +72,10 @@ class SBUS{
 		const uint8_t _sbusFailSafe = 0x08;
 		const uint16_t _defaultMin = 172;
 		const uint16_t _defaultMax = 1811;
+		const uint16_t _defaultMid = 992;
 		uint16_t _sbusMin[_numChannels];
 		uint16_t _sbusMax[_numChannels];
+		uint16_t _sbusMid[_numChannels];
 		float _sbusScale[_numChannels];
 		float _sbusBias[_numChannels];
 		float **_readCoeff, **_writeCoeff;

@@ -5,6 +5,8 @@ brian.taylor@bolderflight.com
 
 Copyright (c) 2016 Bolder Flight Systems
 
+With readS and associated midpoint functions added by Ian Smith, ian@astounding.org.uk
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute,
@@ -45,6 +47,7 @@ void SBUS::begin()
 	// initialize default scale factors and biases
 	for (uint8_t i = 0; i < _numChannels; i++) {
 		setEndPoints(i,_defaultMin,_defaultMax);
+		setMidPoint(i,_defaultMid);
 	}
 	// begin the serial port for SBUS
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
@@ -86,6 +89,55 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 			channels[13] = (uint16_t) ((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)  	 & 0x07FF);
 			channels[14] = (uint16_t) ((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF);
 			channels[15] = (uint16_t) ((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF);
+		}
+		if (lostFrame) {
+    	// count lost frames
+    	if (_payload[22] & _sbusLostFrame) {
+      	*lostFrame = true;
+    	} else {
+				*lostFrame = false;
+			}
+		}
+		if (failsafe) {
+    	// failsafe state
+    	if (_payload[22] & _sbusFailSafe) {
+      		*failsafe = true;
+    	}
+    	else{
+      		*failsafe = false;
+    	}
+		}
+		// return true on receiving a full packet
+		return true;
+  	} else {
+		// return false if a full packet is not received
+		return false;
+	}
+}
+
+/* read the SBUS data and return it as offset from defined mid value*/
+bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
+{
+	// parse the SBUS packet
+	if (parse()) {
+		if (channels) {
+			// 16 channels of 11 bit data
+		  channels[0]  = (uint16_t) (((_payload[0]    |_payload[1] <<8)                     & 0x07FF) - _sbusMid[0]);
+		  channels[1]  = (uint16_t) (((_payload[1]>>3 |_payload[2] <<5)                     & 0x07FF) - _sbusMid[1]);
+		  channels[2]  = (uint16_t) (((_payload[2]>>6 |_payload[3] <<2 |_payload[4]<<10)    & 0x07FF) - _sbusMid[2]);
+		  channels[3]  = (uint16_t) (((_payload[4]>>1 |_payload[5] <<7)                     & 0x07FF) - _sbusMid[3]);
+		  channels[4]  = (uint16_t) (((_payload[5]>>4 |_payload[6] <<4)                     & 0x07FF) - _sbusMid[4]);
+		  channels[5]  = (uint16_t) (((_payload[6]>>7 |_payload[7] <<1 |_payload[8]<<9)     & 0x07FF) - _sbusMid[5]);
+		  channels[6]  = (uint16_t) (((_payload[8]>>2 |_payload[9] <<6)                     & 0x07FF) - _sbusMid[6]);
+		  channels[7]  = (uint16_t) (((_payload[9]>>5 |_payload[10]<<3)                     & 0x07FF) - _sbusMid[7]);
+		  channels[8]  = (uint16_t) (((_payload[11]   |_payload[12]<<8)                     & 0x07FF) - _sbusMid[8]);
+		  channels[9]  = (uint16_t) (((_payload[12]>>3|_payload[13]<<5)                     & 0x07FF) - _sbusMid[9]);
+		  channels[10] = (uint16_t) (((_payload[13]>>6|_payload[14]<<2 |_payload[15]<<10)   & 0x07FF) - _sbusMid[10]);
+		  channels[11] = (uint16_t) (((_payload[15]>>1|_payload[16]<<7)                     & 0x07FF) - _sbusMid[11]);
+		  channels[12] = (uint16_t) (((_payload[16]>>4|_payload[17]<<4)                     & 0x07FF) - _sbusMid[12]);
+		  channels[13] = (uint16_t) (((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)    & 0x07FF) - _sbusMid[13]);
+		  channels[14] = (uint16_t) (((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF) - _sbusMid[14]);
+		  channels[15] = (uint16_t) (((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF) - _sbusMid[15]);
 		}
 		if (lostFrame) {
     	// count lost frames
@@ -211,6 +263,18 @@ void SBUS::getEndPoints(uint8_t channel,uint16_t *min,uint16_t *max)
 	if (min&&max) {
 		*min = _sbusMin[channel];
 		*max = _sbusMax[channel];
+	}
+}
+
+void SBUS::setMidPoint(uint8_t channel,uint16_t mid)
+{
+	_sbusMid[channel] = mid;
+}
+
+void SBUS::getMidPoint(uint8_t channel,uint16_t *mid)
+{
+	if (mid) {
+		*mid = _sbusMid[channel];
 	}
 }
 
