@@ -82,7 +82,7 @@ int16_t channels[16];
 bool failSafe;
 bool lostFrame;
 
-if(x8r.read(&channels[0], &failSafe, &lostFrame)){
+if(x8r.readS(&channels[0], &failSafe, &lostFrame)){
 	Serial.println(channels[0]);
 }
 ```
