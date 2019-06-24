@@ -5,23 +5,23 @@ brian.taylor@bolderflight.com
 
 Copyright (c) 2016 Bolder Flight Systems
 
-With readS and associated midpoint functions added by Ian Smith, ian@astounding.org.uk
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute,
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or
+The above copyright notice and this permission notice shall be included in all copies or 
 substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+// With readS and associated midpoint functions added by Ian Smith, ian@astounding.org.uk
 
 #include "SBUS.h"
 
@@ -53,17 +53,13 @@ void SBUS::begin()
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
-	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 3.5 || Teensy 3.6 || Teensy LC
+	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 3.5 || Teensy 3.6 || Teensy LC 
 		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
-	#elif defined(ESP32)                // ESP32
-        _bus->begin(_sbusBaud,SERIAL_8E2);
-  #elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
-        _bus->begin(_sbusBaud, SERIAL_8E2);
-  #endif
+	#endif
 }
 
 /* read the SBUS data */
@@ -102,7 +98,7 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
     	// failsafe state
     	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = true;
-    	}
+    	} 
     	else{
       		*failsafe = false;
     	}
@@ -115,29 +111,29 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 	}
 }
 
-/* read the SBUS data and return it as offset from defined mid value*/
+// read the SBUS data and return it as offset from defined mid value
 bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
 {
 	// parse the SBUS packet
 	if (parse()) {
 		if (channels) {
 			// 16 channels of 11 bit data
-		  channels[0]  = (uint16_t) (((_payload[0]    |_payload[1] <<8)                     & 0x07FF) - _sbusMid[0]);
-		  channels[1]  = (uint16_t) (((_payload[1]>>3 |_payload[2] <<5)                     & 0x07FF) - _sbusMid[1]);
-		  channels[2]  = (uint16_t) (((_payload[2]>>6 |_payload[3] <<2 |_payload[4]<<10)    & 0x07FF) - _sbusMid[2]);
-		  channels[3]  = (uint16_t) (((_payload[4]>>1 |_payload[5] <<7)                     & 0x07FF) - _sbusMid[3]);
-		  channels[4]  = (uint16_t) (((_payload[5]>>4 |_payload[6] <<4)                     & 0x07FF) - _sbusMid[4]);
-		  channels[5]  = (uint16_t) (((_payload[6]>>7 |_payload[7] <<1 |_payload[8]<<9)     & 0x07FF) - _sbusMid[5]);
-		  channels[6]  = (uint16_t) (((_payload[8]>>2 |_payload[9] <<6)                     & 0x07FF) - _sbusMid[6]);
-		  channels[7]  = (uint16_t) (((_payload[9]>>5 |_payload[10]<<3)                     & 0x07FF) - _sbusMid[7]);
-		  channels[8]  = (uint16_t) (((_payload[11]   |_payload[12]<<8)                     & 0x07FF) - _sbusMid[8]);
-		  channels[9]  = (uint16_t) (((_payload[12]>>3|_payload[13]<<5)                     & 0x07FF) - _sbusMid[9]);
-		  channels[10] = (uint16_t) (((_payload[13]>>6|_payload[14]<<2 |_payload[15]<<10)   & 0x07FF) - _sbusMid[10]);
-		  channels[11] = (uint16_t) (((_payload[15]>>1|_payload[16]<<7)                     & 0x07FF) - _sbusMid[11]);
-		  channels[12] = (uint16_t) (((_payload[16]>>4|_payload[17]<<4)                     & 0x07FF) - _sbusMid[12]);
-		  channels[13] = (uint16_t) (((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)    & 0x07FF) - _sbusMid[13]);
-		  channels[14] = (uint16_t) (((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF) - _sbusMid[14]);
-		  channels[15] = (uint16_t) (((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF) - _sbusMid[15]);
+			channels[0]  = (int16_t) (((_payload[0]    |_payload[1] <<8)                     & 0x07FF) - _sbusMid[0]);
+			channels[1]  = (int16_t) (((_payload[1]>>3 |_payload[2] <<5)                     & 0x07FF) - _sbusMid[1]);
+			channels[2]  = (int16_t) (((_payload[2]>>6 |_payload[3] <<2 |_payload[4]<<10) 	  & 0x07FF) - _sbusMid[2]);
+			channels[3]  = (int16_t) (((_payload[4]>>1 |_payload[5] <<7)                     & 0x07FF) - _sbusMid[3]);
+			channels[4]  = (int16_t) (((_payload[5]>>4 |_payload[6] <<4)                     & 0x07FF) - _sbusMid[4]);
+			channels[5]  = (int16_t) (((_payload[6]>>7 |_payload[7] <<1 |_payload[8]<<9)     & 0x07FF) - _sbusMid[5]);
+			channels[6]  = (int16_t) (((_payload[8]>>2 |_payload[9] <<6)                     & 0x07FF) - _sbusMid[6]);
+			channels[7]  = (int16_t) (((_payload[9]>>5 |_payload[10]<<3)                     & 0x07FF) - _sbusMid[7]);
+			channels[8]  = (int16_t) (((_payload[11]   |_payload[12]<<8)                     & 0x07FF) - _sbusMid[8]);
+			channels[9]  = (int16_t) (((_payload[12]>>3|_payload[13]<<5)                     & 0x07FF) - _sbusMid[9]);
+			channels[10] = (int16_t) (((_payload[13]>>6|_payload[14]<<2 |_payload[15]<<10)   & 0x07FF) - _sbusMid[10]);
+			channels[11] = (int16_t) (((_payload[15]>>1|_payload[16]<<7)                     & 0x07FF) - _sbusMid[11]);
+			channels[12] = (int16_t) (((_payload[16]>>4|_payload[17]<<4)                     & 0x07FF) - _sbusMid[12]);
+			channels[13] = (int16_t) (((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)    & 0x07FF) - _sbusMid[13]);
+			channels[14] = (int16_t) (((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF) - _sbusMid[14]);
+			channels[15] = (int16_t) (((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF) - _sbusMid[15]);
 		}
 		if (lostFrame) {
     	// count lost frames
@@ -151,7 +147,7 @@ bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
     	// failsafe state
     	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = true;
-    	}
+    	} 
     	else{
       		*failsafe = false;
     	}
@@ -163,6 +159,7 @@ bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
 		return false;
 	}
 }
+
 
 /* read the SBUS data and calibrate it to +/- 1 */
 bool SBUS::readCal(float* calChannels, bool* failsafe, bool* lostFrame)
@@ -191,7 +188,7 @@ void SBUS::write(uint16_t* channels)
 	static uint8_t packet[25];
 	/* assemble the SBUS packet */
 	// SBUS header
-	packet[0] = _sbusHeader;
+	packet[0] = _sbusHeader; 
 	// 16 channels of 11 bit data
 	if (channels) {
 		packet[1] = (uint8_t) ((channels[0] & 0x07FF));
@@ -207,7 +204,7 @@ void SBUS::write(uint16_t* channels)
 		packet[11] = (uint8_t) ((channels[7] & 0x07FF)>>3);
 		packet[12] = (uint8_t) ((channels[8] & 0x07FF));
 		packet[13] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
-		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);
+		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);  
 		packet[15] = (uint8_t) ((channels[10] & 0x07FF)>>2);
 		packet[16] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
 		packet[17] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
@@ -222,14 +219,14 @@ void SBUS::write(uint16_t* channels)
 	// footer
 	packet[24] = _sbusFooter;
 	#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
-		// use ISR to send byte at a time,
+		// use ISR to send byte at a time, 
 		// 130 us between bytes to emulate 2 stop bits
 		noInterrupts();
 		memcpy(&PACKET,&packet,sizeof(packet));
 		interrupts();
 		serialTimer.priority(255);
 		serialTimer.begin(sendByte,130);
-	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
+	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
 		// write packet
 		_bus->write(packet,25);
 	#endif
@@ -358,7 +355,7 @@ SBUS::~SBUS()
 }
 
 /* parse the SBUS data */
-bool SBUS::parse()
+bool SBUS::parse() 
 {
 	// reset the parser state if too much time has passed
 	static elapsedMicros _sbusTime = 0;
