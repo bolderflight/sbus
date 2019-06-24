@@ -67,7 +67,6 @@ void SBUS::begin()
   #endif
 }
 
-
 /* read the SBUS data */
 bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 {
@@ -224,14 +223,14 @@ void SBUS::write(uint16_t* channels)
 	// footer
 	packet[24] = _sbusFooter;
 	#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
-		// use ISR to send byte at a time, 
+		// use ISR to send byte at a time,
 		// 130 us between bytes to emulate 2 stop bits
 		noInterrupts();
 		memcpy(&PACKET,&packet,sizeof(packet));
 		interrupts();
 		serialTimer.priority(255);
 		serialTimer.begin(sendByte,130);
-	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
+	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
 		// write packet
 		_bus->write(packet,25);
 	#endif
