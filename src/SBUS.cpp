@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 */
 
 // with bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
-// added by Ian SMith ian@astounding.org.uk
+// added by Ian Smith ian@astounding.org.uk
 
 #include "SBUS.h"
 
@@ -103,7 +103,7 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
     	// failsafe state
     	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = true;
-    	} 
+    	}
     	else{
       		*failsafe = false;
     	}
@@ -116,7 +116,7 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 	}
 }
 
-// read the SBUS data and return it as offset from defined mid value
+/* read signed SBUS data */
 bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
 {
 	// parse the SBUS packet
@@ -152,7 +152,7 @@ bool SBUS::readS(int16_t* channels, bool* failsafe, bool* lostFrame)
     	// failsafe state
     	if (_payload[22] & _sbusFailSafe) {
       		*failsafe = true;
-    	} 
+    	}
     	else{
       		*failsafe = false;
     	}
