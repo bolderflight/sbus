@@ -23,6 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 #include "SBUS.h"
 
+// SEE: https://learn.adafruit.com/adafruit-feather-m0-basic-proto/adapting-sketches-to-m0
+#if defined(ARDUINO_SAMD_ZERO) && defined(SERIAL_PORT_USBVIRTUAL)
+  // Required for Serial on Zero based boards
+  #define Serial SERIAL_PORT_USBVIRTUAL
+#endif
+
 #if defined(__MK20DX128__) || defined(__MK20DX256__)
 	// globals needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2
 	IntervalTimer serialTimer;
@@ -58,9 +64,11 @@ void SBUS::begin()
 		_bus->begin(_sbusBaud,SERIAL_8E2);
 	#elif defined(ESP32)                // ESP32
         _bus->begin(_sbusBaud,SERIAL_8E2);
-  #elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
+  	#elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
         _bus->begin(_sbusBaud, SERIAL_8E2);
-  #endif
+	#elif defined(ARDUINO_SAMD_ZERO) // Adafruit Feather M0
+		_bus->begin(_sbusBaud, SERIAL_8E2);
+  	#endif
 }
 
 /* read the SBUS data */
