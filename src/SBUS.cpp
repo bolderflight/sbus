@@ -56,19 +56,19 @@ void SBUS::begin()
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
-	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 3.5 || Teensy 3.6 || Teensy LC
+	#elif defined(__IMXRT1062__) || defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 4.0 Beta || Teensy 3.5 || Teensy 3.6 || Teensy LC
 		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
-	#elif defined(ESP32)                // ESP32
-        _bus->begin(_sbusBaud,SERIAL_8E2);
-  	#elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
-        _bus->begin(_sbusBaud, SERIAL_8E2);
-	#elif defined(ARDUINO_SAMD_ZERO) // Adafruit Feather M0
+	#elif defined(ESP32)              	// ESP32
+    _bus->begin(_sbusBaud,SERIAL_8E2);
+  #elif defined(__AVR_ATmega2560__)		// Arduino Mega 2560
+    _bus->begin(_sbusBaud, SERIAL_8E2);
+	#elif defined(ARDUINO_SAMD_ZERO)		// Adafruit Feather M0
 		_bus->begin(_sbusBaud, SERIAL_8E2);
-  	#endif
+  #endif
 }
 
 /* read the SBUS data */
@@ -185,7 +185,7 @@ void SBUS::write(uint16_t* channels)
 		interrupts();
 		serialTimer.priority(255);
 		serialTimer.begin(sendByte,130);
-	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_) || defined(__AVR_ATmega2560__) || defined(ESP32)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini || AVR_ATmega2560 || ESP32
+	#else		
 		// write packet
 		_bus->write(packet,25);
 	#endif
