@@ -8,6 +8,7 @@ Added the following optional ESP32 parameters to begin():
 * RX pin
 * TX pin
 * inverting mode true / false
+
 They are required in my ESP32 RC engine sound and light controller: https://github.com/TheDIYGuy999/Rc_Engine_Sound_ESP32
 
 ## Using SBUS on ESP32
