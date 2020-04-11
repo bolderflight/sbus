@@ -3,7 +3,7 @@ SBUS.h
 Brian R Taylor
 brian.taylor@bolderflight.com
 
-Copyright (c) 2016 Bolder Flight Systems
+Copyright (c) 2016 Bolder Flight Systems (ESP32 Support enhanced by TheDIYGuy999)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -40,8 +40,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 class SBUS{
 	public:
-		SBUS(HardwareSerial& bus);
-		void begin();
+        SBUS(HardwareSerial& bus);
+        void begin(uint8_t RX_PIN = 16, uint8_t TX_PIN = 17, bool INVERTED = false); // 16, 17 = UART 2, if not specified (for ESP32 only)
 		bool read(uint16_t* channels, bool* failsafe, bool* lostFrame);
 		bool readCal(float* calChannels, bool* failsafe, bool* lostFrame);
 		void write(uint16_t* channels);

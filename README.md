@@ -3,6 +3,13 @@ Arduino library for communicating with SBUS receivers and servos. SBUS uses inve
 
 ***Developing with the [Teensy 3.2](https://www.pjrc.com/store/teensy32.html) or [LC](https://www.pjrc.com/store/teensylc.html)? Consider buying our [Teensy SBUS Backpack](http://bolderflight.com/products/teensy/sbus/), which provides 8 SBUS outputs pinned to standard servo connectors with bussed power and ground, integrated in a stackable add-on module and thoughtfully designed to integrate perfectly with the Teensy. Check out all of our wonderfully small and powerful [Teensy Backpacks](http://bolderflight.com/products/teensy/)***
 
+## Changes by TheDIYGuy999
+Added the following optional ESP32 parameters to begin():
+* RX pin
+* TX pin
+* inverting mode true / false
+They are required in my ESP32 RC engine sound and light controller: https://github.com/TheDIYGuy999/Rc_Engine_Sound_ESP32
+
 ## Using SBUS on ESP32
 ESP32 may need a logic level converter from 5V to 3.3V.
 

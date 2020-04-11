@@ -42,6 +42,7 @@ void setup() {
 
 	// begin the SBUS communication
 	x8r.begin();
+  // x8r.begin(22, 23, false); // optional parameters for ESP32: RX pin, TX pin, inverse mode
 
 	// setup the analog read resolution to 16 bits
 	analogReadResolution(16);
@@ -78,4 +79,3 @@ void sendSBUS() {
 	// write the SBUS packet to an SBUS compatible servo
   x8r.write(&channels[0]);
 }
-

@@ -3,7 +3,7 @@ SBUS.cpp
 Brian R Taylor
 brian.taylor@bolderflight.com
 
-Copyright (c) 2016 Bolder Flight Systems
+Copyright (c) 2016 Bolder Flight Systems (ESP32 Support enhanced by TheDIYGuy999)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -44,7 +44,7 @@ SBUS::SBUS(HardwareSerial& bus)
 }
 
 /* starts the serial communication */
-void SBUS::begin()
+void SBUS::begin(uint8_t RX_PIN, uint8_t TX_PIN, bool INVERTED) // Allow to specify pins and inverting mode for ESP32 (optional parameters, added by TheDIYGuy999)
 {
 	// initialize parsing state
 	_parserState = 0;
@@ -63,7 +63,7 @@ void SBUS::begin()
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
 	#elif defined(ESP32)              	// ESP32
-    _bus->begin(_sbusBaud,SERIAL_8E2);
+    _bus->begin(_sbusBaud, SERIAL_8E2, RX_PIN, TX_PIN, INVERTED); // Allow to specify pins and inverting mode for ESP32 (optional parameters, added by TheDIYGuy999)
   #elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)		// Arduino Mega 2560, 328P or 32u4
     _bus->begin(_sbusBaud, SERIAL_8E2);
 	#elif defined(ARDUINO_SAMD_ZERO)		// Adafruit Feather M0
