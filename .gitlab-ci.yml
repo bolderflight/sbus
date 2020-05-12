@@ -1,0 +1,12 @@
+stages:
+  - lint
+
+Lint:
+  stage: lint
+  tags:
+    - bfs
+    - mk66fx1m0
+  script: 
+    - cpplint.py --verbose=0 --filter=-whitespace,-line_length src/sbus/sbus.cc
+    - cpplint.py --verbose=0 --filter=-whitespace,-line_length include/sbus/sbus.h
+  
