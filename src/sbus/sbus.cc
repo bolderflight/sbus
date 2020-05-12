@@ -7,24 +7,7 @@
 
 #include "sbus/sbus.h"
 
-/* Needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2 */
-#if defined(__MK20DX128__) || defined(__MK20DX256__)
-namespace {
-  IntervalTimer serial_timer;
-  HardwareSerial *sbus_bus;
-  uint8_t sbus_packet[25];
-  volatile int send_index;
-  void SendByte() {
-    if (send_index < 25) {
-      sbus_bus->write(sbus_packet[send_index]);
-      send_index++;
-    } else {
-      serial_timer.end();
-      send_index = 0;
-    }
-  }
-}  // namespace
-#endif
+namespace sensors {
 
 Sbus::Sbus(HardwareSerial *bus) {
   bus_ = bus;
@@ -34,7 +17,6 @@ void Sbus::Begin() {
   previous_byte_ = SBUS_FOOTER_;
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
     bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-    sbus_bus = bus_;
   #else
     bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
   #endif
@@ -66,6 +48,76 @@ bool Sbus::Read() {
   } else {
     return false;
   }
+}
+std::array<uint16_t, 16> Sbus::rx_channels() {
+  return rx_channels_;
+}
+bool Sbus::lost_frame() {
+  return lost_frame_;
+}
+bool Sbus::failsafe() {
+  return failsafe_;
+}
+bool Sbus::Parse() {
+  while (bus_->available()) {
+    uint8_t c = bus_->read();
+    if (parser_state_ == 0) {
+      if ((c == SBUS_HEADER_) && (previous_byte_ == SBUS_FOOTER_)) {
+        rx_buffer_[parser_state_] = c;
+        parser_state_++;
+      } else {
+        parser_state_ = 0;
+      }
+    } else {
+      if (parser_state_ < SBUS_LENGTH_) {
+        rx_buffer_[parser_state_] = c;
+        parser_state_++;
+      } else {
+        parser_state_ = 0;
+        if (rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    previous_byte_ = c;
+  }
+  return false;
+}
+
+}  // namespace sensors
+
+namespace actuators {
+
+/* Needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2 */
+#if defined(__MK20DX128__) || defined(__MK20DX256__)
+namespace {
+  IntervalTimer serial_timer;
+  HardwareSerial *sbus_bus;
+  uint8_t sbus_packet[25];
+  volatile int send_index;
+  void SendByte() {
+    if (send_index < 25) {
+      sbus_bus->write(sbus_packet[send_index]);
+      send_index++;
+    } else {
+      serial_timer.end();
+      send_index = 0;
+    }
+  }
+}  // namespace
+#endif
+
+Sbus::Sbus(HardwareSerial *bus) {
+  bus_ = bus;
+}
+void Sbus::Begin() {
+  #if defined(__MK20DX128__) || defined(__MK20DX256__)
+    bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
+  #else
+    bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  #endif
 }
 void Sbus::Write() {
   tx_buffer_[0] = SBUS_HEADER_;
@@ -108,48 +160,11 @@ void Sbus::Write() {
     bus_->write(tx_buffer_, sizeof(tx_buffer_));
   #endif
 }
-std::array<uint16_t, 16> Sbus::rx_channels() {
-  return rx_channels_;
-}
 std::array<uint16_t, 16> Sbus::tx_channels() {
   return tx_channels_;
 }
 void Sbus::tx_channels(const std::array<uint16_t, 16> &val) {
   tx_channels_ = val;
 }
-bool Sbus::failsafe() {
-  return failsafe_;
-}
-bool Sbus::lost_frame() {
-  return lost_frame_;
-}
-void Sbus::End() {
-  bus_->end();
-}
-bool Sbus::Parse() {
-  while (bus_->available()) {
-    uint8_t c = bus_->read();
-    if (parser_state_ == 0) {
-      if ((c == SBUS_HEADER_) && (previous_byte_ == SBUS_FOOTER_)) {
-        rx_buffer_[parser_state_] = c;
-        parser_state_++;
-      } else {
-        parser_state_ = 0;
-      }
-    } else {
-      if (parser_state_ < SBUS_LENGTH_) {
-        rx_buffer_[parser_state_] = c;
-        parser_state_++;
-      } else {
-        parser_state_ = 0;
-        if (rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }
-    previous_byte_ = c;
-  }
-  return false;
-}
+
+}  // namespace actuators

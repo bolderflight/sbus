@@ -20,13 +20,46 @@ The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 da
 Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that several frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms. FrSky receivers will output a range of 172 - 1811 with channels set to a range of -100% to +100%. Using extended limits of -150% to +150% outputs a range of 0 to 2047, which is the maximum range acheivable with 11 bits of data.
 
 ## Installation
+CMake is used to build this library, which is exported as a library target called *sbus*. The header is added as:
 
-## Methods
+```
+#include "sbus/sbus.h"
+```
+Note that you'll need CMake version 3.13 or above; it is recommended to build and install CMake from source, directions are located in the [CMake GitLab repository](https://github.com/Kitware/CMake).
 
-**Sbus(HardwareSerial &ast;bus)** Creates an Sbus object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets and the TX pin will send SBUS packets.
+The library can be also be compiled stand-alone using the CMake idiom of creating a *build* directory and then, from within that directory issuing:
+
+```
+cmake .. -DMCU=MK66FX1M0
+make
+```
+
+This will build the library, an example executable called *sbus_example*, and executables for testing using the Google Test framework. The example executable source file is located at *examples/sbus_example.cc*. This code is built and tested on an AMD64 system running Linux and is likely to build on AMD64 systems running the Windows Subsystem for Linux (WSL). The [arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) toolchain must be installed in your Linux environment.
+
+Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
+   * MK20DX128
+   * MK20DX256
+   * MK64FX512
+   * MK66FX1M0
+   * MKL26Z64
+
+These are known to work with the same packages used in Teensy products. Also switching the MK66FX1M0 or MK64FX512 from BGA to LQFP packages is known to work well. Swapping packages of other chips is probably fine, as long as it's only a package change.
+
+The *sbus_example* target creates an executable for communicating with sbus receivers and servos. This target also has a *_hex* for creating the hex file and a *_upload* to upload the software to the microcontroller. 
+
+Testing is done using a lightweight Remote Command Protocol (RCP) between a Linux *master* and the microcontroller *slave*. The *slave* registers tests, which the *master* can call and receive a boolean status on the test results. A definition file utility, [mcu_hil_defs](https://gitlab.com/bolderflight/utils/mcu_hil_defs) defines the pins and ports for each sensor and communication method. A seperate utility, *mcu_reset*, cycles power to the microcontroller and sensors to provide a clean environment; it should be used before each test. See *tests/master.cc* and *tests/slave.cc* for how the tests are defined.
+
+# Namespaces
+The Sbus object for receiving SBUS data from a receiver is within the namespace *sensors*. The Sbus object for sending SBUS commands to servos is within the namespace *actuators*.
+
+# Methods
+
+## Sensors
+
+**Sbus(HardwareSerial &ast;bus)** Creates an Sbus object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets.
 
 ```C++
-Sbus sbus(&Serial1);
+sensors::Sbus sbus(&Serial1);
 ```
 
 **void Begin()** Initializes SBUS communication.
@@ -43,28 +76,10 @@ if (sbus.Read()) {
 }
 ```
 
-**void Write()** Writes an SBUS packet. The packet is written immediately, you should regulate timing of sending packets to servos to maintain a frequency of approximately 100 Hz.
-
-```C++
-sbus.Write();
-```
-
 **std::array<uint16_t, 16> rx_channels()** Returns the array of received channel data.
 
 ```C++
 std::array<uint16_t, 16> sbus_data = sbus.rx_channels();
-```
-
-**std::array<uint16_t, 16> tx_channels()** Returns the array of channel data to be transmitted.
-
-```C++
-std::array<uint16_t, 16> sbus_tx_data = sbus.tx_channels();
-```
-
-**void tx_channels(const std::array<uint16_t, 16> &val)** Sets the channel data to be transmitted.
-
-```C++
-sbus.tx_channels(sbus_tx_data);
 ```
 
 **bool lost_frame()** Returns true if a frame has been lost.
@@ -79,8 +94,34 @@ bool lost_frame = sbus.lost_frame();
 bool failsafe = sbus.failsafe();
 ```
 
-**void End()** Frees the serial port used by the Sbus object.
+## Actuators
+
+**Sbus(HardwareSerial &ast;bus)** Creates an Sbus object. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
 
 ```C++
-sbus.End();
+actuators::Sbus sbus(&Serial1);
+```
+
+**void Begin()** Initializes SBUS communication.
+
+```C++
+sbus.Begin();
+```
+
+**void Write()** Writes an SBUS packet. The packet is written immediately, you should regulate timing of sending packets to servos to maintain a frequency of approximately 100 Hz.
+
+```C++
+sbus.Write();
+```
+
+**void tx_channels(const std::array<uint16_t, 16> &val)** Sets the channel data to be transmitted.
+
+```C++
+sbus.tx_channels(sbus_tx_data);
+```
+
+**std::array<uint16_t, 16> tx_channels()** Returns the array of channel data to be transmitted.
+
+```C++
+std::array<uint16_t, 16> sbus_tx_data = sbus.tx_channels();
 ```
