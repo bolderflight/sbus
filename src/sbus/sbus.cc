@@ -7,13 +7,37 @@
 
 #include "sbus/sbus.h"
 
-Sbus::Sbus(HardwareSerial &bus) {
-  bus_ = &bus;
+/* Needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2 */
+#if defined(__MK20DX128__) || defined(__MK20DX256__)
+namespace {
+  IntervalTimer serial_timer;
+  HardwareSerial *sbus_bus;
+  uint8_t sbus_packet[25];
+  volatile int send_index;
+  void SendByte() {
+    if (send_index < 25) {
+      sbus_bus->write(sbus_packet[send_index]);
+      send_index++;
+    } else {
+      serial_timer.end();
+      send_index = 0;
+    }
+  }
+}  // namespace
+#endif
+
+Sbus::Sbus(HardwareSerial *bus) {
+  bus_ = bus;
 }
 void Sbus::Begin() {
   parser_state_ = 0;
   previous_byte_ = SBUS_FOOTER_;
-  bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  #if defined(__MK20DX128__) || defined(__MK20DX256__)
+    bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
+    sbus_bus = bus_;
+  #else
+    bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  #endif
 }
 bool Sbus::Read() {
   if (Parse()) {
@@ -25,7 +49,7 @@ bool Sbus::Read() {
     rx_channels_[4]  = (uint16_t) ((rx_buffer_[6]  >> 4  | rx_buffer_[7]  << 4)                         & 0x07FF);
     rx_channels_[5]  = (uint16_t) ((rx_buffer_[7]  >> 7  | rx_buffer_[8]  << 1  | rx_buffer_[9] << 9)   & 0x07FF);
     rx_channels_[6]  = (uint16_t) ((rx_buffer_[9]  >> 2  | rx_buffer_[10] << 6)                         & 0x07FF);
-    rx_channels_[7]  = (uint16_t) ((rx_buffer_[10]  >> 5 | rx_buffer_[11] << 3)                         & 0x07FF);
+    rx_channels_[7]  = (uint16_t) ((rx_buffer_[10] >> 5  | rx_buffer_[11] << 3)                         & 0x07FF);
     rx_channels_[8]  = (uint16_t) ((rx_buffer_[12]       | rx_buffer_[13] << 8)                         & 0x07FF);
     rx_channels_[9]  = (uint16_t) ((rx_buffer_[13] >> 3  | rx_buffer_[14] << 5)                         & 0x07FF);
     rx_channels_[10] = (uint16_t) ((rx_buffer_[14] >> 6  | rx_buffer_[15] << 2  | rx_buffer_[16] << 10) & 0x07FF);
@@ -69,7 +93,20 @@ void Sbus::Write() {
   tx_buffer_[22] =  (uint8_t) ((tx_channels_[15]  & 0x07FF) >> 3);
   tx_buffer_[23] = 0x00;
   tx_buffer_[24] = SBUS_FOOTER_;
-  bus_->write(tx_buffer_, sizeof(tx_buffer_));
+
+  #if defined(__MK20DX128__) || defined(__MK20DX256__)
+    /* 
+    * Use ISR to send byte at a time,
+    * 130 us between bytes to emulate 2 stop bits
+    */
+    __disable_irq();
+    memcpy(sbus_packet, tx_buffer_, sizeof(sbus_packet));
+    __enable_irq();
+    serial_timer.priority(255);
+    serial_timer.begin(SendByte, 130);
+  #else
+    bus_->write(tx_buffer_, sizeof(tx_buffer_));
+  #endif
 }
 std::array<uint16_t, 16> Sbus::rx_channels() {
   return rx_channels_;

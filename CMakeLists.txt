@@ -18,7 +18,6 @@ if (DEFINED MCU)
 	FetchContent_Declare(
 		core
 		GIT_REPOSITORY 	git@gitlab.com:bolderflight/software/core.git
-		GIT_TAG					v0.8.0
 	)
 	FetchContent_MakeAvailable(core)
 	# Add the library target
@@ -37,4 +36,23 @@ if (DEFINED MCU)
 		$<INSTALL_INTERFACE:include>
 	)
 endif()
-
+# Example and test if this project is built separately
+if (PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
+	if (DEFINED MCU)		
+		# Add the spi example target
+		add_executable(sbus_example examples/sbus_example.cc)
+		# Add the includes
+		target_include_directories(sbus_example PUBLIC 
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+			$<INSTALL_INTERFACE:include>
+		)
+		# Link libraries to the example target
+		target_link_libraries(sbus_example
+			PRIVATE 
+				sbus
+		)
+		# Add hex and upload targets
+		include(${CMAKE_SOURCE_DIR}/cmake/flash_mcu.cmake)
+		FlashMcu(sbus_example ${MCU})
+	endif()
+endif()

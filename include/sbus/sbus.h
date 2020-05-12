@@ -13,7 +13,7 @@
 
 class Sbus {
  public:
-  Sbus(HardwareSerial &bus);
+  explicit Sbus(HardwareSerial *bus);
   void Begin();
   bool Read();
   void Write();
@@ -23,6 +23,7 @@ class Sbus {
   bool failsafe();
   bool lost_frame();
   void End();
+
  private:
   /* Communication */
   HardwareSerial *bus_;
@@ -44,4 +45,4 @@ class Sbus {
   bool Parse();
 };
 
-#endif
+#endif  // INCLUDE_SBUS_SBUS_H_
