@@ -1,22 +1,29 @@
 /*
-	SBUS.cpp
-	Brian R Taylor
-	brian.taylor@bolderflight.com
+SBUS.cpp
+Brian R Taylor
+brian.taylor@bolderflight.com
 
-	Copyright (c) 2016 Bolder Flight Systems
+Copyright (c) 2016 Bolder Flight Systems
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*********************************************************************************************
+***  Modified by Jared Reabow to support Arduino UNO and other arduino variants 27-09-19  ***
+*********************************************************************************************
+
 */
 
 #include "SBUS.h"
@@ -54,21 +61,21 @@ void SBUS::begin()
 	#if defined(__MK20DX128__) || defined(__MK20DX256__)  // Teensy 3.0 || Teensy 3.1/3.2
 		_bus->begin(_sbusBaud,SERIAL_8E1_RXINV_TXINV);
 		SERIALPORT = _bus;
-	#elif defined(__IMXRT1062__) || defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 4.0 Beta || Teensy 3.5 || Teensy 3.6 || Teensy LC
+	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)  // Teensy 4.0 || Teensy 3.5 || Teensy 3.6 || Teensy LC
 		_bus->begin(_sbusBaud,SERIAL_8E2_RXINV_TXINV);
 	#elif defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx)  // STM32L4
 		_bus->begin(_sbusBaud,SERIAL_SBUS);
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
-	#elif defined(ESP32)              	// ESP32
-    _bus->begin(_sbusBaud,SERIAL_8E2);
-  #elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)		// Arduino Mega 2560, 328P or 32u4
-    _bus->begin(_sbusBaud, SERIAL_8E2);
-	#elif defined(ARDUINO_SAMD_ZERO)		// Adafruit Feather M0
+	#elif defined(ESP32)                // ESP32
+        _bus->begin(_sbusBaud,SERIAL_8E2);
+  	#elif defined(__AVR_ATmega2560__)  // Arduino Mega 2560
+        _bus->begin(_sbusBaud, SERIAL_8E2);
+	#elif defined(ARDUINO_SAMD_ZERO) // Adafruit Feather M0
 		_bus->begin(_sbusBaud, SERIAL_8E2);
-	#else
-		#error unsupported device
-  #endif
+	#else 
+        _bus->begin(_sbusBaud, SERIAL_8E2);
+  	#endif
 }
 
 /* read the SBUS data */
@@ -185,8 +192,10 @@ void SBUS::write(uint16_t* channels)
 		interrupts();
 		serialTimer.priority(255);
 		serialTimer.begin(sendByte,130);
-	#else		
+	#elif defined(__IMXRT1052__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_) || defined(__AVR_ATmega2560__) || defined(ESP32)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini || AVR_ATmega2560 || ESP32
 		// write packet
+		_bus->write(packet,25);
+	#else
 		_bus->write(packet,25);
 	#endif
 }
