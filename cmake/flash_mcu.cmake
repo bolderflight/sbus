@@ -1,5 +1,5 @@
 # macro that flashes a target MCU
-macro (flashMcu TARGET MCU)
+function (flashMcu TARGET MCU)
   string(APPEND HEX_TARGET ${TARGET} _hex)
   string(APPEND HEX_CMD ${TARGET} .hex)
   string(APPEND UPLOAD_TARGET ${TARGET} _upload)
@@ -17,7 +17,8 @@ macro (flashMcu TARGET MCU)
   # Add 'make upload' target to upload binary
   # Check whether we are using WSL or linux to determine loader to use
   file(READ "/proc/version" linux_version)
-  string(FIND ${linux_version} "Microsoft" wsl)
+  string(TOLOWER ${linux_version} linux_version_lower)
+  string(FIND ${linux_version_lower} "microsoft" wsl)
   if (wsl GREATER -1)
     add_custom_target(${UPLOAD_TARGET}
       COMMAND ${CMAKE_SOURCE_DIR}/tools/teensy_loader_cli.exe ${MCU_CMD} -w ${HEX_CMD} -v
@@ -25,10 +26,10 @@ macro (flashMcu TARGET MCU)
     )
   else (wsl GREATER -1)
     add_custom_target(${UPLOAD_TARGET}
-      COMMAND ${CMAKE_SOURCE_DIR}/tools/teensy_loader_cli ${MCU_CMD} -w ${HEX_CMD} -v
+      COMMAND teensy_loader_cli ${MCU_CMD} -s ${HEX_CMD} -v
       DEPENDS ${HEX_CMD}
     )
   endif (wsl GREATER -1)
   # Linker
   set_property(TARGET ${TARGET} PROPERTY LINK_DEPENDS ${LINKER_SCRIPT})
-endmacro ()
+endfunction ()

@@ -5,9 +5,7 @@ This library communicates with SBUS receivers and servos.
    * [Contributing guide](CONTRIBUTING.md)
 
 # Description
-SBUS is a bus protocol for receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single serial line can be connected with up to 16 servos with each receiving a unique command. SBUS capable servos are required; each can be programmed with a unique address using an SBUS servo programmer.
-
-SBUS can be used to receive pilot commands from an SBUS capable receiver to use as input to a flight control system. SBUS outputs can be sent to SBUS capable capable servos. Advantages compared to PWM include a reduction in vehicle wiring and ease of parsing SBUS packets.
+SBUS is a bus protocol for receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single serial line can be connected with up to 16 servos with each receiving a unique command.
 
 The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 data bits, even parity, and 2 stop bits. The SBUS packet is 25 bytes long consisting of:
    * Byte[0]: SBUS header, 0x0F
@@ -18,6 +16,8 @@ The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 da
    * Byte[24]: SBUS footer
 
 Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that several frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms. FrSky receivers will output a range of 172 - 1811 with channels set to a range of -100% to +100%. Using extended limits of -150% to +150% outputs a range of 0 to 2047, which is the maximum range acheivable with 11 bits of data.
+
+Because SBUS is a digital bus format, it is an excellent means of receiving pilot commands from a transmitter and an SBUS capable receiver. If SBUS servos are used in the aircraft, SBUS is also an excellent means of sending actuator commands - servo commands can often be sent with lower latency and, by only using a single pin to command up to 16 servos, additional microcontroller pins are freed for other uses.
 
 ## Installation
 CMake is used to build this library, which is exported as a library target called *sbus*. The header is added as:
@@ -34,7 +34,7 @@ cmake .. -DMCU=MK66FX1M0
 make
 ```
 
-This will build the library, an example executable called *sbus_example*, and executables for testing using the Google Test framework. The example executable source file is located at *examples/sbus_example.cc*. This code is built and tested on an AMD64 system running Linux and is likely to build on AMD64 systems running the Windows Subsystem for Linux (WSL). The [arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) toolchain must be installed in your Linux environment.
+This will build the library and example executable called *sbus_example*. The example executable source file is located at *examples/sbus_example.cc*. This code is built and tested on AARCH64 and AMD64 systems running Linux and on AMD64 systems running the Windows Subsystem for Linux (WSL). The [arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) toolchain must be installed in your Linux environment.
 
 Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
    * MK20DX128
@@ -46,8 +46,6 @@ Notice that the *cmake* command includes a define specifying the microcontroller
 These are known to work with the same packages used in Teensy products. Also switching the MK66FX1M0 or MK64FX512 from BGA to LQFP packages is known to work well. Swapping packages of other chips is probably fine, as long as it's only a package change.
 
 The *sbus_example* target creates an executable for communicating with sbus receivers and servos. This target also has a *_hex* for creating the hex file and a *_upload* to upload the software to the microcontroller. 
-
-Testing is done using a lightweight Remote Command Protocol (RCP) between a Linux *master* and the microcontroller *slave*. The *slave* registers tests, which the *master* can call and receive a boolean status on the test results. A definition file utility, [mcu_hil_defs](https://gitlab.com/bolderflight/utils/mcu_hil_defs) defines the pins and ports for each sensor and communication method. A seperate utility, *mcu_reset*, cycles power to the microcontroller and sensors to provide a clean environment; it should be used before each test. See *tests/master.cc* and *tests/slave.cc* for how the tests are defined.
 
 # Namespaces
 The Sbus object for receiving SBUS data from a receiver is within the namespace *sensors*. The Sbus object for sending SBUS commands to servos is within the namespace *actuators*.
