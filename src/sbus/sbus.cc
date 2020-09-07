@@ -20,34 +20,40 @@ void Sbus::Begin() {
   #else
     bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
   #endif
+  /* flush the bus */
+  bus_->flush();
 }
 bool Sbus::Read() {
-  if (Parse()) {
-    /* Grab the channel data */
-    rx_channels_[0]  = (uint16_t) ((rx_buffer_[1]        | rx_buffer_[2]  << 8)                         & 0x07FF);
-    rx_channels_[1]  = (uint16_t) ((rx_buffer_[2]  >> 3  | rx_buffer_[3]  << 5)                         & 0x07FF);
-    rx_channels_[2]  = (uint16_t) ((rx_buffer_[3]  >> 6  | rx_buffer_[4]  << 2  | rx_buffer_[5] << 10)  & 0x07FF);
-    rx_channels_[3]  = (uint16_t) ((rx_buffer_[5]  >> 1  | rx_buffer_[6]  << 7)                         & 0x07FF);
-    rx_channels_[4]  = (uint16_t) ((rx_buffer_[6]  >> 4  | rx_buffer_[7]  << 4)                         & 0x07FF);
-    rx_channels_[5]  = (uint16_t) ((rx_buffer_[7]  >> 7  | rx_buffer_[8]  << 1  | rx_buffer_[9] << 9)   & 0x07FF);
-    rx_channels_[6]  = (uint16_t) ((rx_buffer_[9]  >> 2  | rx_buffer_[10] << 6)                         & 0x07FF);
-    rx_channels_[7]  = (uint16_t) ((rx_buffer_[10] >> 5  | rx_buffer_[11] << 3)                         & 0x07FF);
-    rx_channels_[8]  = (uint16_t) ((rx_buffer_[12]       | rx_buffer_[13] << 8)                         & 0x07FF);
-    rx_channels_[9]  = (uint16_t) ((rx_buffer_[13] >> 3  | rx_buffer_[14] << 5)                         & 0x07FF);
-    rx_channels_[10] = (uint16_t) ((rx_buffer_[14] >> 6  | rx_buffer_[15] << 2  | rx_buffer_[16] << 10) & 0x07FF);
-    rx_channels_[11] = (uint16_t) ((rx_buffer_[16] >> 1  | rx_buffer_[17] << 7)                         & 0x07FF);
-    rx_channels_[12] = (uint16_t) ((rx_buffer_[17] >> 4  | rx_buffer_[18] << 4)                         & 0x07FF);
-    rx_channels_[13] = (uint16_t) ((rx_buffer_[18] >> 7  | rx_buffer_[19] << 1  | rx_buffer_[20] << 9)  & 0x07FF);
-    rx_channels_[14] = (uint16_t) ((rx_buffer_[20] >> 2  | rx_buffer_[21] << 6)                         & 0x07FF);
-    rx_channels_[15] = (uint16_t) ((rx_buffer_[21] >> 5  | rx_buffer_[22] << 3)                         & 0x07FF);
-    /* Grab the lost frame */
-    lost_frame_ = rx_buffer_[23] & SBUS_LOST_FRAME_;
-    /* Grab the failsafe */
-    failsafe_ = rx_buffer_[23] & SBUS_FAILSAFE_;
-    return true;
-  } else {
-    return false;
+  bool status = false;
+  /*  Parse through to the most recent packet if we've fallen behind */
+  while (bus_->available()) {
+    if (Parse()) {
+      /* Grab the channel data */
+      rx_channels_[0]  = (uint16_t) ((rx_buffer_[1]        | rx_buffer_[2]  << 8)                         & 0x07FF);
+      rx_channels_[1]  = (uint16_t) ((rx_buffer_[2]  >> 3  | rx_buffer_[3]  << 5)                         & 0x07FF);
+      rx_channels_[2]  = (uint16_t) ((rx_buffer_[3]  >> 6  | rx_buffer_[4]  << 2  | rx_buffer_[5] << 10)  & 0x07FF);
+      rx_channels_[3]  = (uint16_t) ((rx_buffer_[5]  >> 1  | rx_buffer_[6]  << 7)                         & 0x07FF);
+      rx_channels_[4]  = (uint16_t) ((rx_buffer_[6]  >> 4  | rx_buffer_[7]  << 4)                         & 0x07FF);
+      rx_channels_[5]  = (uint16_t) ((rx_buffer_[7]  >> 7  | rx_buffer_[8]  << 1  | rx_buffer_[9] << 9)   & 0x07FF);
+      rx_channels_[6]  = (uint16_t) ((rx_buffer_[9]  >> 2  | rx_buffer_[10] << 6)                         & 0x07FF);
+      rx_channels_[7]  = (uint16_t) ((rx_buffer_[10] >> 5  | rx_buffer_[11] << 3)                         & 0x07FF);
+      rx_channels_[8]  = (uint16_t) ((rx_buffer_[12]       | rx_buffer_[13] << 8)                         & 0x07FF);
+      rx_channels_[9]  = (uint16_t) ((rx_buffer_[13] >> 3  | rx_buffer_[14] << 5)                         & 0x07FF);
+      rx_channels_[10] = (uint16_t) ((rx_buffer_[14] >> 6  | rx_buffer_[15] << 2  | rx_buffer_[16] << 10) & 0x07FF);
+      rx_channels_[11] = (uint16_t) ((rx_buffer_[16] >> 1  | rx_buffer_[17] << 7)                         & 0x07FF);
+      rx_channels_[12] = (uint16_t) ((rx_buffer_[17] >> 4  | rx_buffer_[18] << 4)                         & 0x07FF);
+      rx_channels_[13] = (uint16_t) ((rx_buffer_[18] >> 7  | rx_buffer_[19] << 1  | rx_buffer_[20] << 9)  & 0x07FF);
+      rx_channels_[14] = (uint16_t) ((rx_buffer_[20] >> 2  | rx_buffer_[21] << 6)                         & 0x07FF);
+      rx_channels_[15] = (uint16_t) ((rx_buffer_[21] >> 5  | rx_buffer_[22] << 3)                         & 0x07FF);
+      /* Grab the lost frame */
+      lost_frame_ = rx_buffer_[23] & SBUS_LOST_FRAME_;
+      /* Grab the failsafe */
+      failsafe_ = rx_buffer_[23] & SBUS_FAILSAFE_;
+      /* Set the status */
+      status = true;
+    }
   }
+  return status;
 }
 std::array<uint16_t, 16> Sbus::rx_channels() {
   return rx_channels_;
