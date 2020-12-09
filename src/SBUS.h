@@ -39,6 +39,7 @@
 class SBUS{
 	public:
 		SBUS(HardwareSerial& bus);
+		SBUS(HardwareSerial& bus, uint8_t rxpin, uint8_t txpin); // supports ESP32
 		void begin();
 		bool read(uint16_t* channels, bool* failsafe, bool* lostFrame);
 		bool readCal(float* calChannels, bool* failsafe, bool* lostFrame);
@@ -68,6 +69,8 @@ class SBUS{
 		const uint16_t _defaultMax = 1811;
 		uint16_t _sbusMin[_numChannels];
 		uint16_t _sbusMax[_numChannels];
+        uint8_t _rxpin = 0; // ESP32
+        uint8_t _txpin = 0; // ESP32
 		float _sbusScale[_numChannels];
 		float _sbusBias[_numChannels];
 		float **_readCoeff, **_writeCoeff;

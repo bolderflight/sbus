@@ -41,6 +41,15 @@ SBUS::SBUS(HardwareSerial& bus)
 	_bus = &bus;
 }
 
+/* Supports specifying GPIO pins for EPS32*/
+SBUS::SBUS(HardwareSerial& bus, uint8_t rxpin, uint8_t txpin)
+{
+	_bus = &bus;
+
+    _rxpin = rxpin;
+    _txpin = txpin;
+}
+
 /* starts the serial communication */
 void SBUS::begin()
 {
@@ -61,9 +70,14 @@ void SBUS::begin()
 	#elif defined(_BOARD_MAPLE_MINI_H_) // Maple Mini
 		_bus->begin(_sbusBaud,SERIAL_8E2);
 	#elif defined(ESP32)              	// ESP32
-    _bus->begin(_sbusBaud,SERIAL_8E2);
+        if (_rxpin!=0 && _txpin != 0) {
+            _bus->begin(_sbusBaud, SERIAL_8E2, _rxpin, _txpin);
+        }
+        else {
+            _bus->begin(_sbusBaud,SERIAL_8E2);
+        }
   #elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)		// Arduino Mega 2560, 328P or 32u4
-    _bus->begin(_sbusBaud, SERIAL_8E2);
+        _bus->begin(_sbusBaud, SERIAL_8E2);
 	#elif defined(ARDUINO_SAMD_ZERO)		// Adafruit Feather M0
 		_bus->begin(_sbusBaud, SERIAL_8E2);
 	#else
