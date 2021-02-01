@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.4
+- Added support for Teensy 4.x
+
 ## v1.0.3
 - Updated CONTRIBUTING
 - Updated *fetch_content* to use https instead of ssh
