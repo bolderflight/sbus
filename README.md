@@ -42,6 +42,8 @@ Notice that the *cmake* command includes a define specifying the microcontroller
    * MK64FX512
    * MK66FX1M0
    * MKL26Z64
+   * IMXRT1062_T40
+   * IMXRT1062_T41
 
 These are known to work with the same packages used in Teensy products. Also switching the MK66FX1M0 or MK64FX512 from BGA to LQFP packages is known to work well. Swapping packages of other chips is probably fine, as long as it's only a package change.
 

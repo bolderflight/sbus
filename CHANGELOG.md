@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.5
+- Updated for v2.0.3 of the core library
+
 ## v1.0.4
 - Added support for Teensy 4.x
 
