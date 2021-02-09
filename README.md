@@ -25,7 +25,6 @@ CMake is used to build this library, which is exported as a library target calle
 ```
 #include "sbus/sbus.h"
 ```
-Note that you'll need CMake version 3.13 or above; it is recommended to build and install CMake from source, directions are located in the [CMake GitLab repository](https://github.com/Kitware/CMake).
 
 The library can be also be compiled stand-alone using the CMake idiom of creating a *build* directory and then, from within that directory issuing:
 
@@ -34,9 +33,7 @@ cmake .. -DMCU=MK66FX1M0
 make
 ```
 
-This will build the library and example executable called *sbus_example*. The example executable source file is located at *examples/sbus_example.cc*. This code is built and tested on AARCH64 and AMD64 systems running Linux and on AMD64 systems running the Windows Subsystem for Linux (WSL). The [arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) toolchain must be installed in your Linux environment.
-
-Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
+This will build the library and example executable called *sbus_example*. The example executable source file is located at *examples/sbus_example.cc*. Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
    * MK20DX128
    * MK20DX256
    * MK64FX512
@@ -45,9 +42,9 @@ Notice that the *cmake* command includes a define specifying the microcontroller
    * IMXRT1062_T40
    * IMXRT1062_T41
 
-These are known to work with the same packages used in Teensy products. Also switching the MK66FX1M0 or MK64FX512 from BGA to LQFP packages is known to work well. Swapping packages of other chips is probably fine, as long as it's only a package change.
+These are known to work with the same packages used in Teensy products. Also switching packages is known to work well, as long as it's only a package change.
 
-The *sbus_example* target creates an executable for communicating with sbus receivers and servos. This target also has a *_hex* for creating the hex file and a *_upload* to upload the software to the microcontroller. 
+The *sbus_example* target creates an executable for communicating with sbus receivers and servos. This target also has a *_hex* for creating the hex file to upload to the microcontroller. 
 
 # Namespaces
 The Sbus object for receiving SBUS data from a receiver is within the namespace *sensors*. The Sbus object for sending SBUS commands to servos is within the namespace *actuators*.
