@@ -45,6 +45,7 @@ class SbusRx {
   /* Parsing */
   static constexpr uint8_t SBUS_HEADER_ = 0x0F;
   static constexpr uint8_t SBUS_FOOTER_ = 0x00;
+  static constexpr uint8_t SBUS2_FOOTER_ = 0x04;
   static constexpr uint8_t SBUS_LENGTH_ = 25;
   static constexpr uint8_t SBUS_LOST_FRAME_ = 0x04;
   static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;

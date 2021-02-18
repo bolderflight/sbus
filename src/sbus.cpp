@@ -96,7 +96,7 @@ bool SbusRx::Parse() {
   while (bus_->available()) {
     uint8_t c = bus_->read();
     if (parser_state_ == 0) {
-      if ((c == SBUS_HEADER_) && (previous_byte_ == SBUS_FOOTER_)) {
+      if ((c == SBUS_HEADER_) && ((previous_byte_ == SBUS_FOOTER_) || ((previous_byte_ & 0x0F) == SBUS2_FOOTER_))) {
         rx_buffer_[parser_state_] = c;
         parser_state_++;
       } else {
@@ -108,7 +108,7 @@ bool SbusRx::Parse() {
         parser_state_++;
       } else {
         parser_state_ = 0;
-        if (rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) {
+        if ((rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) || ((rx_buffer_[SBUS_LENGTH_ - 1] & 0x0F) == SBUS2_FOOTER_)) {
           return true;
         } else {
           return false;
