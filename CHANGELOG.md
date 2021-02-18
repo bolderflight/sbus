@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.1
+- Added back in support for SBUS2 footers
+
 ## v2.0.0
 - Updated to match our [SBUS](https://github.com/bolderflight/sbus) library for flight software
 - Updated license to MIT
