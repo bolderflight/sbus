@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.6
+- Added Channel 17 and 18 support
+- Added ability to set lost_frame and failsafe for transmitting
+- Added suport for SBUS2 with telemetry enabled
+
 ## v1.0.6
 - Updated for v2.0.4 of the core library
 
