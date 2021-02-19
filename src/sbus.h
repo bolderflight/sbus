@@ -26,15 +26,26 @@
 #ifndef INCLUDE_SBUS_SBUS_H_
 #define INCLUDE_SBUS_SBUS_H_
 
-#include <array>
+
+#if defined(__AVR__)
+#define ETL_NO_STL
 #include "Arduino.h"
+#include <Embedded_Template_Library.h>
+#include <etl/array.h>
+namespace sbus = etl;
+#else
+#include "Arduino.h"
+#include <array>
+namespace sbus = std;
+#endif
+
 
 class SbusRx {
  public:
   explicit SbusRx(HardwareSerial *bus);
   void Begin();
   bool Read();
-  std::array<uint16_t, 16> rx_channels();
+  sbus::array<uint16_t, 16> rx_channels();
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
   inline bool ch17() const {return ch17_;}
@@ -57,7 +68,7 @@ class SbusRx {
   uint8_t previous_byte_ = SBUS_FOOTER_;
   uint8_t rx_buffer_[SBUS_LENGTH_];
   /* Data */
-  std::array<uint16_t, 16> rx_channels_;
+  sbus::array<uint16_t, 16> rx_channels_;
   bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
   bool Parse();
 };
@@ -71,12 +82,12 @@ class SbusTx {
   void lost_frame(bool val) {lost_frame_ = val;}
   void ch17(bool val) {ch17_ = val;}
   void ch18(bool val) {ch18_ = val;}
-  void tx_channels(const std::array<uint16_t, 16> &val);
+  void tx_channels(const sbus::array<uint16_t, 16> &val);
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
   inline bool ch17() const {return ch17_;}
   inline bool ch18() const {return ch18_;}
-  std::array<uint16_t, 16> tx_channels();
+  sbus::array<uint16_t, 16> tx_channels();
 
  private:
   /* Communication */
@@ -92,7 +103,7 @@ class SbusTx {
   static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;
   uint8_t tx_buffer_[SBUS_LENGTH_];
   /* Data */
-  std::array<uint16_t, 16> tx_channels_;
+  sbus::array<uint16_t, 16> tx_channels_;
   bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 };
 

@@ -87,7 +87,7 @@ bool SbusRx::Read() {
   }
   return status;
 }
-std::array<uint16_t, 16> SbusRx::rx_channels() {
+sbus::array<uint16_t, 16> SbusRx::rx_channels() {
   return rx_channels_;
 }
 bool SbusRx::Parse() {
@@ -199,9 +199,9 @@ void SbusTx::Write() {
     bus_->write(tx_buffer_, sizeof(tx_buffer_));
   #endif
 }
-std::array<uint16_t, 16> SbusTx::tx_channels() {
+sbus::array<uint16_t, 16> SbusTx::tx_channels() {
   return tx_channels_;
 }
-void SbusTx::tx_channels(const std::array<uint16_t, 16> &val) {
+void SbusTx::tx_channels(const sbus::array<uint16_t, 16> &val) {
   tx_channels_ = val;
 }

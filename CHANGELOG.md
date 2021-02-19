@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.2
+- Added Embedded Template Library support for AVR boards.
+
 ## v2.1.1
 - Added CH17 and 18 support for read and write
 - Added capability to write lost_frame or failsafe

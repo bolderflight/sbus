@@ -36,12 +36,14 @@ SBUS uses an inverted serial protocol, which is not commonly supported in Arduin
 
 For all other microcontrollers, you **must** use a serial inverter.
 
-# Usage
+# Installation
 Simply clone or download and extract the zipped library into your Arduino/libraries folder. The library is added as:
 
 ```C++
 #include "sbus.h"
 ```
+
+**AVR Boards:** you will also need to clone or download the [Embedded Template Library](https://github.com/ETLCPP/etl-arduino) into your Arduino/libraries folder. This provides *etl::array* functionality as an alternative to *std::array*.
 
 # Methods
 
