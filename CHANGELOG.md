@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.1
+- Added CH17 and 18 support for read and write
+- Added capability to write lost_frame or failsafe
+
 ## v2.0.1
 - Added back in support for SBUS2 footers
 

@@ -73,6 +73,10 @@ bool SbusRx::Read() {
       rx_channels_[13] = (uint16_t) ((rx_buffer_[18] >> 7  | rx_buffer_[19] << 1  | rx_buffer_[20] << 9)  & 0x07FF);
       rx_channels_[14] = (uint16_t) ((rx_buffer_[20] >> 2  | rx_buffer_[21] << 6)                         & 0x07FF);
       rx_channels_[15] = (uint16_t) ((rx_buffer_[21] >> 5  | rx_buffer_[22] << 3)                         & 0x07FF);
+      /* CH 17 */
+      ch17_ = rx_buffer_[23] & SBUS_CH17_;
+      /* CH 18 */
+      ch18_ = rx_buffer_[23] & SBUS_CH18_;
       /* Grab the lost frame */
       lost_frame_ = rx_buffer_[23] & SBUS_LOST_FRAME_;
       /* Grab the failsafe */
@@ -85,12 +89,6 @@ bool SbusRx::Read() {
 }
 std::array<uint16_t, 16> SbusRx::rx_channels() {
   return rx_channels_;
-}
-bool SbusRx::lost_frame() {
-  return lost_frame_;
-}
-bool SbusRx::failsafe() {
-  return failsafe_;
 }
 bool SbusRx::Parse() {
   while (bus_->available()) {
@@ -184,7 +182,7 @@ void SbusTx::Write() {
   tx_buffer_[20] =  (uint8_t) ((tx_channels_[13]  & 0x07FF) >> 9  | (tx_channels_[14] & 0x07FF) << 2);
   tx_buffer_[21] =  (uint8_t) ((tx_channels_[14]  & 0x07FF) >> 6  | (tx_channels_[15] & 0x07FF) << 5);
   tx_buffer_[22] =  (uint8_t) ((tx_channels_[15]  & 0x07FF) >> 3);
-  tx_buffer_[23] = 0x00;
+  tx_buffer_[23] = 0x00 | (ch17_ * SBUS_CH17_) | (ch18_ * SBUS_CH18_) | (failsafe_ * SBUS_FAILSAFE_) | (lost_frame_ * SBUS_LOST_FRAME_);
   tx_buffer_[24] = SBUS_FOOTER_;
 
   #if defined(__MK20DX128__) || defined(__MK20DX256__)

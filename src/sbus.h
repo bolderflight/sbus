@@ -35,8 +35,10 @@ class SbusRx {
   void Begin();
   bool Read();
   std::array<uint16_t, 16> rx_channels();
-  bool failsafe();
-  bool lost_frame();
+  inline bool failsafe() const {return failsafe_;}
+  inline bool lost_frame() const {return lost_frame_;}
+  inline bool ch17() const {return ch17_;}
+  inline bool ch18() const {return ch18_;}
 
  private:
   /* Communication */
@@ -47,6 +49,8 @@ class SbusRx {
   static constexpr uint8_t SBUS_FOOTER_ = 0x00;
   static constexpr uint8_t SBUS2_FOOTER_ = 0x04;
   static constexpr uint8_t SBUS_LENGTH_ = 25;
+  static constexpr uint8_t SBUS_CH17_ = 0x01;
+  static constexpr uint8_t SBUS_CH18_ = 0x02;
   static constexpr uint8_t SBUS_LOST_FRAME_ = 0x04;
   static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;
   unsigned int parser_state_ = 0;
@@ -54,7 +58,7 @@ class SbusRx {
   uint8_t rx_buffer_[SBUS_LENGTH_];
   /* Data */
   std::array<uint16_t, 16> rx_channels_;
-  bool failsafe_ = false, lost_frame_ = false;
+  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
   bool Parse();
 };
 
@@ -63,8 +67,16 @@ class SbusTx {
   explicit SbusTx(HardwareSerial *bus);
   void Begin();
   void Write();
-  std::array<uint16_t, 16> tx_channels();
+  void failsafe(bool val) {failsafe_ = val;}
+  void lost_frame(bool val) {lost_frame_ = val;}
+  void ch17(bool val) {ch17_ = val;}
+  void ch18(bool val) {ch18_ = val;}
   void tx_channels(const std::array<uint16_t, 16> &val);
+  inline bool failsafe() const {return failsafe_;}
+  inline bool lost_frame() const {return lost_frame_;}
+  inline bool ch17() const {return ch17_;}
+  inline bool ch18() const {return ch18_;}
+  std::array<uint16_t, 16> tx_channels();
 
  private:
   /* Communication */
@@ -74,9 +86,14 @@ class SbusTx {
   static constexpr uint8_t SBUS_HEADER_ = 0x0F;
   static constexpr uint8_t SBUS_FOOTER_ = 0x00;
   static constexpr uint8_t SBUS_LENGTH_ = 25;
+  static constexpr uint8_t SBUS_CH17_ = 0x01;
+  static constexpr uint8_t SBUS_CH18_ = 0x02;
+  static constexpr uint8_t SBUS_LOST_FRAME_ = 0x04;
+  static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;
   uint8_t tx_buffer_[SBUS_LENGTH_];
   /* Data */
   std::array<uint16_t, 16> tx_channels_;
+  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 };
 
 #endif  // INCLUDE_SBUS_SBUS_H_
