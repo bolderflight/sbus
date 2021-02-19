@@ -79,6 +79,18 @@ if (sbus.Read()) {
 std::array<uint16_t, 16> sbus_data = sbus.rx_channels();
 ```
 
+**bool ch17()** Returns the value of channel 17.
+
+```C++
+bool ch17 = sbus.ch17();
+```
+
+**bool ch18()** Returns the value of channel 18.
+
+```C++
+bool ch18 = sbus.ch18();
+```
+
 **bool lost_frame()** Returns true if a frame has been lost.
 
 ```C++
@@ -117,8 +129,56 @@ sbus.Write();
 sbus.tx_channels(sbus_tx_data);
 ```
 
+**void ch17(bool val)** Sets the value of channel 17 to be transmitted.
+
+```C++
+sbus.ch17(true);
+```
+
+**void ch18(bool val)** Sets the value of channel 18 to be transmitted.
+
+```C++
+sbus.ch18(true);
+```
+
+**void lost_frame(bool val)** Sets whether to transmit the lost frame flag.
+
+```C++
+sbus.lost_frame(true);
+```
+
+**void failsafe(bool val)** Sets whether to transmit the failsafe flag.
+
+```C++
+sbus.failsafe(true);
+```
+
 **std::array<uint16_t, 16> tx_channels()** Returns the array of channel data to be transmitted.
 
 ```C++
 std::array<uint16_t, 16> sbus_tx_data = sbus.tx_channels();
+```
+
+**bool ch17()** Returns the value of channel 17 to be transmitted.
+
+```C++
+bool ch17 = sbus.ch17();
+```
+
+**bool ch18()** Returns the value of channel 18 to be transmitted.
+
+```C++
+bool ch18 = sbus.ch18();
+```
+
+**bool lost_frame()** Returns the lost frame flag value to be transmitted.
+
+```C++
+bool lost_frame = sbus.lost_frame();
+```
+
+**bool failsafe()** Returns the failsafe flag value to be transmitted.
+
+```C++
+bool failsafe = sbus.failsafe();
 ```

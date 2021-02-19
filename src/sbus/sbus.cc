@@ -9,9 +9,6 @@
 
 namespace sensors {
 
-Sbus::Sbus(HardwareSerial *bus) {
-  bus_ = bus;
-}
 void Sbus::Begin() {
   parser_state_ = 0;
   previous_byte_ = SBUS_FOOTER_;
@@ -45,6 +42,10 @@ bool Sbus::Read() {
       rx_channels_[13] = (uint16_t) ((rx_buffer_[18] >> 7  | rx_buffer_[19] << 1  | rx_buffer_[20] << 9)  & 0x07FF);
       rx_channels_[14] = (uint16_t) ((rx_buffer_[20] >> 2  | rx_buffer_[21] << 6)                         & 0x07FF);
       rx_channels_[15] = (uint16_t) ((rx_buffer_[21] >> 5  | rx_buffer_[22] << 3)                         & 0x07FF);
+      /* Channel 17 */
+      ch17_ = rx_buffer_[23] & SBUS_CH17_;
+      /* Channel 18 */
+      ch18_ = rx_buffer_[23] & SBUS_CH18_;
       /* Grab the lost frame */
       lost_frame_ = rx_buffer_[23] & SBUS_LOST_FRAME_;
       /* Grab the failsafe */
@@ -55,20 +56,11 @@ bool Sbus::Read() {
   }
   return status;
 }
-std::array<uint16_t, 16> Sbus::rx_channels() {
-  return rx_channels_;
-}
-bool Sbus::lost_frame() {
-  return lost_frame_;
-}
-bool Sbus::failsafe() {
-  return failsafe_;
-}
 bool Sbus::Parse() {
   while (bus_->available()) {
     uint8_t c = bus_->read();
     if (parser_state_ == 0) {
-      if ((c == SBUS_HEADER_) && (previous_byte_ == SBUS_FOOTER_)) {
+      if ((c == SBUS_HEADER_) && ((previous_byte_ == SBUS_FOOTER_) || ((previous_byte_ & 0x0F) == SBUS2_FOOTER_))) {
         rx_buffer_[parser_state_] = c;
         parser_state_++;
       } else {
@@ -80,7 +72,7 @@ bool Sbus::Parse() {
         parser_state_++;
       } else {
         parser_state_ = 0;
-        if (rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) {
+        if ((rx_buffer_[SBUS_LENGTH_ - 1] == SBUS_FOOTER_) || ((rx_buffer_[SBUS_LENGTH_ - 1] & 0x0F) == SBUS2_FOOTER_)) {
           return true;
         } else {
           return false;
@@ -115,9 +107,6 @@ namespace {
 }  // namespace
 #endif
 
-Sbus::Sbus(HardwareSerial *bus) {
-  bus_ = bus;
-}
 void Sbus::Begin() {
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
     bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
@@ -149,7 +138,7 @@ void Sbus::Write() {
   tx_buffer_[20] =  (uint8_t) ((tx_channels_[13]  & 0x07FF) >> 9  | (tx_channels_[14] & 0x07FF) << 2);
   tx_buffer_[21] =  (uint8_t) ((tx_channels_[14]  & 0x07FF) >> 6  | (tx_channels_[15] & 0x07FF) << 5);
   tx_buffer_[22] =  (uint8_t) ((tx_channels_[15]  & 0x07FF) >> 3);
-  tx_buffer_[23] = 0x00;
+  tx_buffer_[23] = 0x00 | (ch17_ * SBUS_CH17_) | (ch18_ * SBUS_CH18_) | (failsafe_ * SBUS_FAILSAFE_) | (lost_frame_ * SBUS_LOST_FRAME_);
   tx_buffer_[24] = SBUS_FOOTER_;
 
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -165,12 +154,6 @@ void Sbus::Write() {
   #else
     bus_->write(tx_buffer_, sizeof(tx_buffer_));
   #endif
-}
-std::array<uint16_t, 16> Sbus::tx_channels() {
-  return tx_channels_;
-}
-void Sbus::tx_channels(const std::array<uint16_t, 16> &val) {
-  tx_channels_ = val;
 }
 
 }  // namespace actuators

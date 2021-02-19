@@ -8,5 +8,5 @@ Lint:
     - mk66fx1m0
   script: 
     - cpplint.py --verbose=0 --filter=-whitespace,-line_length src/sbus/sbus.cc
-    - cpplint.py --verbose=0 include/sbus/sbus.h
+    - cpplint.py --verbose=0 --filter=-whitespace,-line_length include/sbus/sbus.h
   
