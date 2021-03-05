@@ -52,17 +52,15 @@ These are known to work with the same packages used in Teensy products. Also swi
 
 The *sbus_example* target creates an executable for communicating with sbus receivers and servos. This target also has a *_hex* for creating the hex file to upload to the microcontroller. 
 
-# Namespaces
-The Sbus object for receiving SBUS data from a receiver is within the namespace *sensors*. The Sbus object for sending SBUS commands to servos is within the namespace *actuators*.
+# Namespace
+This library is within the namespace *bfs*
 
-# Methods
+# SbusRx
 
-## Sensors
-
-**Sbus(HardwareSerial &ast;bus)** Creates an Sbus object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets.
+**SbusRx(HardwareSerial &ast;bus)** Creates an *SbusRx* object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets.
 
 ```C++
-sensors::Sbus sbus(&Serial1);
+bfs::SbusRx sbus(&Serial1);
 ```
 
 **void Begin()** Initializes SBUS communication.
@@ -109,12 +107,12 @@ bool lost_frame = sbus.lost_frame();
 bool failsafe = sbus.failsafe();
 ```
 
-## Actuators
+## SbusTx
 
-**Sbus(HardwareSerial &ast;bus)** Creates an Sbus object. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
+**SbusTx(HardwareSerial &ast;bus)** Creates an *SbusTx* object. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
 
 ```C++
-actuators::Sbus sbus(&Serial1);
+bfs::SbusTx sbus(&Serial1);
 ```
 
 **void Begin()** Initializes SBUS communication.

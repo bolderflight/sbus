@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.0
+- Updated to namespace *bfs*
+- Updated sensors::Sbus to SbusRx and actuators::Sbus to SbusTx
+
 ## v1.1.6
 - Added Channel 17 and 18 support
 - Added ability to set lost_frame and failsafe for transmitting
