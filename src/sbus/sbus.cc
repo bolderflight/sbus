@@ -41,7 +41,9 @@ bool SbusRx::Begin() {
   elapsedMillis timer_ms = 0;
   while (timer_ms < TIMEOUT_MS_) {
     if (Read()) {
-      return true;
+      if (!failsafe() && !lost_frame()) {
+        return true;
+      }
     }
   }
   return false;

@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.1
+- Added a check for lost-link / failsafe in SbusRx.Begin()
+
 ## v2.1.0
 - Added a timeout to the SbusRx.Begin() method to indicate whether a packet was received
 
