@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.0
+- Added a timeout to the SbusRx.Begin() method to indicate whether a packet was received
+
 ## v2.0.0
 - Updated to namespace *bfs*
 - Updated sensors::Sbus to SbusRx and actuators::Sbus to SbusTx

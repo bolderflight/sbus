@@ -27,7 +27,7 @@
 
 namespace bfs {
 
-void SbusRx::Begin() {
+bool SbusRx::Begin() {
   state_ = 0;
   prev_byte_ = FOOTER_;
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -37,6 +37,14 @@ void SbusRx::Begin() {
   #endif
   /* flush the bus */
   bus_->flush();
+  /* check communication */
+  elapsedMillis timer_ms = 0;
+  while (timer_ms < TIMEOUT_MS_) {
+    if (Read()) {
+      return true;
+    }
+  }
+  return false;
 }
 bool SbusRx::Read() {
   bool status = false;
