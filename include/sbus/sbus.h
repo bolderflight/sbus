@@ -34,7 +34,7 @@ namespace bfs {
 class SbusRx {
  public:
   explicit SbusRx(HardwareSerial *bus) : bus_(bus) {}
-  void Begin();
+  bool Begin();
   bool Read();
   inline std::array<uint16_t, 16> rx_channels() const {return ch_;}
   inline bool failsafe() const {return failsafe_;}
@@ -46,6 +46,7 @@ class SbusRx {
   /* Communication */
   HardwareSerial *bus_;
   static constexpr uint32_t BAUD_ = 100000;
+  static constexpr unsigned int TIMEOUT_MS_ = 5000;
   /* Parsing */
   static constexpr uint8_t HEADER_ = 0x0F;
   static constexpr uint8_t FOOTER_ = 0x00;

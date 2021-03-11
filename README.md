@@ -63,7 +63,7 @@ This library is within the namespace *bfs*
 bfs::SbusRx sbus(&Serial1);
 ```
 
-**void Begin()** Initializes SBUS communication.
+**bool Begin()** Initializes SBUS communication, returns true if an SBUS packet is received within the timeout (5 seconds) otherwise returns false.
 
 ```C++
 sbus.Begin();

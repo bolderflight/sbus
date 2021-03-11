@@ -5,7 +5,7 @@ if (DEFINED MCU)
 endif()
 # Project information
 project(Sbus
-	VERSION 1.1.6
+	VERSION 2.0.1
 	DESCRIPTION "SBUS encoder and decoder"
 	LANGUAGES C CXX
 )
