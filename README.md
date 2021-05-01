@@ -57,16 +57,16 @@ This library is within the namespace *bfs*
 
 # SbusRx
 
-**SbusRx(HardwareSerial &ast;bus)** Creates an *SbusRx* object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets.
+**SbusRx()** Creates an *SbusRx* object.
 
 ```C++
-bfs::SbusRx sbus(&Serial1);
+bfs::SbusRx sbus;
 ```
 
-**bool Begin()** Initializes SBUS communication, returns true if an SBUS packet is received within the timeout (5 seconds) otherwise returns false.
+**bool Begin(HardwareSerial &ast;bus)** Initializes SBUS communication. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets. Returns true if an SBUS packet is received within the timeout (5 seconds) otherwise returns false.
 
 ```C++
-sbus.Begin();
+sbus.Begin(&Serial1);
 ```
 
 **bool Read()** Parses SBUS packets, returns true on successfully receiving an SBUS packet.
@@ -109,16 +109,16 @@ bool failsafe = sbus.failsafe();
 
 ## SbusTx
 
-**SbusTx(HardwareSerial &ast;bus)** Creates an *SbusTx* object. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
-
+**SbusTx()** Creates an *SbusTx* object.
 ```C++
-bfs::SbusTx sbus(&Serial1);
+bfs::SbusTx sbus();
 ```
 
-**void Begin()** Initializes SBUS communication.
+**void Begin(HardwareSerial &ast;bus)** Initializes SBUS communication. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
+
 
 ```C++
-sbus.Begin();
+sbus.Begin(&Serial1);
 ```
 
 **void Write()** Writes an SBUS packet. The packet is written immediately, you should regulate timing of sending packets to servos to maintain a frequency of approximately 100 Hz.

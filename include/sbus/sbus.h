@@ -33,8 +33,7 @@ namespace bfs {
 
 class SbusRx {
  public:
-  explicit SbusRx(HardwareSerial *bus) : bus_(bus) {}
-  bool Begin();
+  bool Begin(HardwareSerial *bus);
   bool Read();
   inline std::array<uint16_t, 16> rx_channels() const {return ch_;}
   inline bool failsafe() const {return failsafe_;}
@@ -67,8 +66,7 @@ class SbusRx {
 
 class SbusTx {
  public:
-  explicit SbusTx(HardwareSerial *bus) : bus_(bus) {}
-  void Begin();
+  void Begin(HardwareSerial *bus);
   void Write();
   inline void failsafe(const bool val) {failsafe_ = val;}
   inline void lost_frame(const bool val) {lost_frame_ = val;}
