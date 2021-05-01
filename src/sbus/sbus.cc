@@ -27,7 +27,8 @@
 
 namespace bfs {
 
-bool SbusRx::Begin() {
+bool SbusRx::Begin(HardwareSerial *bus) {
+  bus_ = bus;
   state_ = 0;
   prev_byte_ = FOOTER_;
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -137,7 +138,8 @@ namespace {
 }  // namespace
 #endif
 
-void SbusTx::Begin() {
+void SbusTx::Begin(HardwareSerial *bus) {
+  bus_ = bus;
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
     bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
   #else

@@ -26,20 +26,20 @@
 #include "sbus/sbus.h"
 
 /* SBUS object, reading SBUS */
-bfs::SbusRx sbus_rx(&Serial2);
+bfs::SbusRx sbus_rx;
 /* SBUS object, writing SBUS */
-bfs::SbusTx sbus_tx(&Serial2);
+bfs::SbusTx sbus_tx;
 
 int main() {
   /* Serial to display data */
   Serial.begin(115200);
   while(!Serial) {}
   /* Begin communicating on SBUS serial */
-  if (!sbus_rx.Begin()) {
+  if (!sbus_rx.Begin(&Serial2)) {
     Serial.println("Unable to establish communication with SBUS receiver");
     while (1) {}
   }
-  sbus_tx.Begin();
+  sbus_tx.Begin(&Serial2);
   while(1) {
     /* Check if SBUS packet received */
     if (sbus_rx.Read()) {

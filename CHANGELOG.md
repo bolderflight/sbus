@@ -1,5 +1,8 @@
 # Changelog
 
+## v3.0.0
+- Moved the HardwareSerial bus to the *Begin* method
+
 ## v2.1.1
 - Added a check for lost-link / failsafe in SbusRx.Begin()
 
