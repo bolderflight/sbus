@@ -40,8 +40,6 @@ make
 ```
 
 This will build the library and example executable called *sbus_example*. The example executable source file is located at *examples/sbus_example.cc*. Notice that the *cmake* command includes a define specifying the microcontroller the code is being compiled for. This is required to correctly configure the code, CPU frequency, and compile/linker options. The available MCUs are:
-   * MK20DX128
-   * MK20DX256
    * MK64FX512
    * MK66FX1M0
    * MKL26Z64
@@ -56,133 +54,92 @@ The *sbus_example* target creates an executable for communicating with sbus rece
 This library is within the namespace *bfs*
 
 # SbusRx
+This driver conforms to the [Inceptor interface](https://github.com/bolderflight/inceptor); please refer to those documents for information on the *InceptorConfig* and *InceptorData* structs.
 
-**SbusRx()** Creates an *SbusRx* object.
-
-```C++
-bfs::SbusRx sbus;
-```
-
-**bool Begin(HardwareSerial &ast;bus)** Initializes SBUS communication. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets. Returns true if an SBUS packet is received within the timeout (5 seconds) otherwise returns false.
+**bool Init(const InceptorConfig &ref)** Initializes communication with the SBUS receiver. Returns true on successfully initializing communication with the receiver. Note that often receivers will not transmit data until they've connected with an SBUS transmitter, so it might be necessary to turn on the transmitter before this method is called.
 
 ```C++
-sbus.Begin(&Serial1);
-```
-
-**bool Read()** Parses SBUS packets, returns true on successfully receiving an SBUS packet.
-
-```C++
-if (sbus.Read()) {
-   // Do something with the received data
+/* SBUS object, reading SBUS */
+bfs::SbusRx sbus_rx;
+/* RX Config */
+bfs::InceptorConfig rx_config = {
+   .hw = &Serial2,
+   .throttle = {
+   .ch = 0,
+   .num_coef = 2,
+   .poly_coef = {0.0012203, -1.2098841}
+   }
+};
+if (!sbus_rx.Init(rx_config)) {
+   Serial.println("Unable to establish communication with SBUS receiver");
+   while (1) {}
 }
 ```
 
-**std::array<uint16_t, 16> rx_channels()** Returns the array of received channel data.
+**bool Read(InceptorData * const data)** Reads data from the SBUS receiver adn passes the data to the *InceptorData* struct. Returns true on successfully receiving new data.
 
 ```C++
-std::array<uint16_t, 16> sbus_data = sbus.rx_channels();
+/* Sbus RX data */
+bfs::InceptorData data;
+if (sbus_rx.Read(&data)) {
+
+}
 ```
 
-**bool ch17()** Returns the value of channel 17.
+# SbusTx
+This driver conforms to the [Effector interface](https://github.com/bolderflight/effector); please refer to those documents for information on the *EffectorConfig* and struct.
+
+**bool Init(const EffectorConfig &ref)** Initializes communication on the SBUS. Returns true on success.
 
 ```C++
-bool ch17 = sbus.ch17();
+/* SBUS object, writing SBUS */
+bfs::SbusTx<16> sbus_tx;
+/* TX Config */
+bfs::EffectorConfig<16> tx_config = {
+   .hw = &Serial2,
+   .effectors = {
+   {
+      .type = bfs::SERVO,
+      .ch = 1,
+      .min = -20,
+      .max = 20,
+      .failsafe = 0,
+      .num_coef = 2,
+      .poly_coef = {819.50, 991.50}
+   }
+   }
+};
+if (!sbus_tx.Init(tx_config)) {
+   Serial.println("Unable to init SBUS transmitter");
+   while (1) {}
+}
 ```
 
-**bool ch18()** Returns the value of channel 18.
+**void Cmd(std::span<float> cmds)** Issues angle commands, which are converted to SBUS commands and stored.
 
 ```C++
-bool ch18 = sbus.ch18();
+cmds[0] = data.throttle;
+sbus_tx.Cmd(cmds);
 ```
 
-**bool lost_frame()** Returns true if a frame has been lost.
+**void Write()** Sends the stored SBUS commands to the servos. This method should be called every 10ms to 20ms.
 
 ```C++
-bool lost_frame = sbus.lost_frame();
+sbus_tx.Write();
 ```
 
-**bool failsafe()** Returns true if the receiver has entered failsafe mode.
+**void EnableMotors()** Enables motors to output commands.
 
 ```C++
-bool failsafe = sbus.failsafe();
+sbus_tx.EnableMotors();
 ```
 
-## SbusTx
+**void DisableMotors()** Disables motors from outputting commands, the failsafe command is sent instead.
 
-**SbusTx()** Creates an *SbusTx* object.
-```C++
-bfs::SbusTx sbus();
-```
-
-**void Begin(HardwareSerial &ast;bus)** Initializes SBUS communication. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
-
+**void EnableServos()** Enables servos to output commands.
 
 ```C++
-sbus.Begin(&Serial1);
+sbus_tx.EnableServos();
 ```
 
-**void Write()** Writes an SBUS packet. The packet is written immediately, you should regulate timing of sending packets to servos to maintain a frequency of approximately 100 Hz.
-
-```C++
-sbus.Write();
-```
-
-**void tx_channels(const std::array<uint16_t, 16> &val)** Sets the channel data to be transmitted.
-
-```C++
-sbus.tx_channels(sbus_tx_data);
-```
-
-**void ch17(bool val)** Sets the value of channel 17 to be transmitted.
-
-```C++
-sbus.ch17(true);
-```
-
-**void ch18(bool val)** Sets the value of channel 18 to be transmitted.
-
-```C++
-sbus.ch18(true);
-```
-
-**void lost_frame(bool val)** Sets whether to transmit the lost frame flag.
-
-```C++
-sbus.lost_frame(true);
-```
-
-**void failsafe(bool val)** Sets whether to transmit the failsafe flag.
-
-```C++
-sbus.failsafe(true);
-```
-
-**std::array<uint16_t, 16> tx_channels()** Returns the array of channel data to be transmitted.
-
-```C++
-std::array<uint16_t, 16> sbus_tx_data = sbus.tx_channels();
-```
-
-**bool ch17()** Returns the value of channel 17 to be transmitted.
-
-```C++
-bool ch17 = sbus.ch17();
-```
-
-**bool ch18()** Returns the value of channel 18 to be transmitted.
-
-```C++
-bool ch18 = sbus.ch18();
-```
-
-**bool lost_frame()** Returns the lost frame flag value to be transmitted.
-
-```C++
-bool lost_frame = sbus.lost_frame();
-```
-
-**bool failsafe()** Returns the failsafe flag value to be transmitted.
-
-```C++
-bool failsafe = sbus.failsafe();
-```
+**void DisableServos()** Disables servos from outputting commands, the failsafe command is sent instead.

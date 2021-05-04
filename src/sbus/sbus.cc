@@ -24,74 +24,114 @@
 */
 
 #include "sbus/sbus.h"
+#include "inceptor/inceptor.h"
+#include "polytools/polytools.h"
 
 namespace bfs {
 
-bool SbusRx::Begin(HardwareSerial *bus) {
-  bus_ = bus;
-  state_ = 0;
-  prev_byte_ = FOOTER_;
-  #if defined(__MK20DX128__) || defined(__MK20DX256__)
-    bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-  #else
-    bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
-  #endif
+bool SbusRx::Init(const InceptorConfig &cfg) {
+  /* Copy the config */
+  config_ = cfg;
+  /* Start the bus */
+  config_.hw->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
   /* flush the bus */
-  bus_->flush();
+  config_.hw->flush();
   /* check communication */
   elapsedMillis timer_ms = 0;
   while (timer_ms < TIMEOUT_MS_) {
-    if (Read()) {
-      if (!failsafe() && !lost_frame()) {
+    if (Parse()) {
+      bool lost_frame = buf_[23] & LOST_FRAME_;
+      bool failsafe = buf_[23] & FAILSAFE_;
+      if (!failsafe && !lost_frame) {
         return true;
       }
     }
   }
   return false;
 }
-bool SbusRx::Read() {
-  bool status = false;
-  /*  Parse through to the most recent packet if we've fallen behind */
-  while (bus_->available()) {
+bool SbusRx::Read(InceptorData * const ptr) {
+  if (!ptr) {return false;}
+  /* Read through all available packets to get the newest */
+  ptr->new_data = false;
+  do {
     if (Parse()) {
-      /* Grab the channel data */
-      ch_[0]  = static_cast<uint16_t>(buf_[1]       | buf_[2]  << 8 & 0x07FF);
-      ch_[1]  = static_cast<uint16_t>(buf_[2]  >> 3 | buf_[3]  << 5 & 0x07FF);
-      ch_[2]  = static_cast<uint16_t>(buf_[3]  >> 6 | buf_[4]  << 2  |
-                buf_[5] << 10 & 0x07FF);
-      ch_[3]  = static_cast<uint16_t>(buf_[5]  >> 1 | buf_[6]  << 7 & 0x07FF);
-      ch_[4]  = static_cast<uint16_t>(buf_[6]  >> 4 | buf_[7]  << 4 & 0x07FF);
-      ch_[5]  = static_cast<uint16_t>(buf_[7]  >> 7 | buf_[8]  << 1  |
-                buf_[9] << 9 & 0x07FF);
-      ch_[6]  = static_cast<uint16_t>(buf_[9]  >> 2 | buf_[10] << 6 & 0x07FF);
-      ch_[7]  = static_cast<uint16_t>(buf_[10] >> 5 | buf_[11] << 3 & 0x07FF);
-      ch_[8]  = static_cast<uint16_t>(buf_[12]      | buf_[13] << 8 & 0x07FF);
-      ch_[9]  = static_cast<uint16_t>(buf_[13] >> 3 | buf_[14] << 5 & 0x07FF);
-      ch_[10] = static_cast<uint16_t>(buf_[14] >> 6 | buf_[15] << 2  |
-                buf_[16] << 10 & 0x07FF);
-      ch_[11] = static_cast<uint16_t>(buf_[16] >> 1 | buf_[17] << 7 & 0x07FF);
-      ch_[12] = static_cast<uint16_t>(buf_[17] >> 4 | buf_[18] << 4 & 0x07FF);
-      ch_[13] = static_cast<uint16_t>(buf_[18] >> 7 | buf_[19] << 1  |
-                buf_[20] << 9 & 0x07FF);
-      ch_[14] = static_cast<uint16_t>(buf_[20] >> 2 | buf_[21] << 6 & 0x07FF);
-      ch_[15] = static_cast<uint16_t>(buf_[21] >> 5 | buf_[22] << 3 & 0x07FF);
-      /* Channel 17 */
-      ch17_ = buf_[23] & CH17_;
-      /* Channel 18 */
-      ch18_ = buf_[23] & CH18_;
-      /* Grab the lost frame */
-      lost_frame_ = buf_[23] & LOST_FRAME_;
-      /* Grab the failsafe */
-      failsafe_ = buf_[23] & FAILSAFE_;
-      /* Set the status */
-      status = true;
+      ptr->new_data = true;
     }
+  } while (config_.hw->available());
+  /* Parse new data, if available */
+  if (ptr->new_data) {
+    /* Grab the channel data */
+    ch_[0]  = static_cast<uint16_t>(buf_[1]       | buf_[2]  << 8 & 0x07FF);
+    ch_[1]  = static_cast<uint16_t>(buf_[2]  >> 3 | buf_[3]  << 5 & 0x07FF);
+    ch_[2]  = static_cast<uint16_t>(buf_[3]  >> 6 | buf_[4]  << 2  |
+              buf_[5] << 10 & 0x07FF);
+    ch_[3]  = static_cast<uint16_t>(buf_[5]  >> 1 | buf_[6]  << 7 & 0x07FF);
+    ch_[4]  = static_cast<uint16_t>(buf_[6]  >> 4 | buf_[7]  << 4 & 0x07FF);
+    ch_[5]  = static_cast<uint16_t>(buf_[7]  >> 7 | buf_[8]  << 1  |
+              buf_[9] << 9 & 0x07FF);
+    ch_[6]  = static_cast<uint16_t>(buf_[9]  >> 2 | buf_[10] << 6 & 0x07FF);
+    ch_[7]  = static_cast<uint16_t>(buf_[10] >> 5 | buf_[11] << 3 & 0x07FF);
+    ch_[8]  = static_cast<uint16_t>(buf_[12]      | buf_[13] << 8 & 0x07FF);
+    ch_[9]  = static_cast<uint16_t>(buf_[13] >> 3 | buf_[14] << 5 & 0x07FF);
+    ch_[10] = static_cast<uint16_t>(buf_[14] >> 6 | buf_[15] << 2  |
+              buf_[16] << 10 & 0x07FF);
+    ch_[11] = static_cast<uint16_t>(buf_[16] >> 1 | buf_[17] << 7 & 0x07FF);
+    ch_[12] = static_cast<uint16_t>(buf_[17] >> 4 | buf_[18] << 4 & 0x07FF);
+    ch_[13] = static_cast<uint16_t>(buf_[18] >> 7 | buf_[19] << 1  |
+              buf_[20] << 9 & 0x07FF);
+    ch_[14] = static_cast<uint16_t>(buf_[20] >> 2 | buf_[21] << 6 & 0x07FF);
+    ch_[15] = static_cast<uint16_t>(buf_[21] >> 5 | buf_[22] << 3 & 0x07FF);
+    /* Grab the lost frame */
+    ptr->lost_frame = buf_[23] & LOST_FRAME_;
+    /* Grab the failsafe */
+    ptr->failsafe = buf_[23] & FAILSAFE_;
+    /* Throttle enable */
+    std::span<float> thr_en_coef{config_.throttle_en.poly_coef,
+        static_cast<std::size_t>(config_.throttle_en.num_coef)};
+    ptr->throttle_en = static_cast<bool>(polyval<float>(thr_en_coef,
+                                         ch_[config_.throttle_en.ch]));
+    /* mode0 */
+    std::span<float> mode0_coef{config_.mode0.poly_coef,
+        static_cast<std::size_t>(config_.mode0.num_coef)};
+    ptr->mode0 = static_cast<int8_t>(polyval<float>(mode0_coef,
+                                     ch_[config_.mode0.ch]));
+    /* mode1 */
+    std::span<float> mode1_coef{config_.mode1.poly_coef,
+        static_cast<std::size_t>(config_.mode1.num_coef)};
+    ptr->mode1 = static_cast<int8_t>(polyval<float>(mode1_coef,
+                                     ch_[config_.mode1.ch]));
+    /* mode2 */
+    std::span<float> mode2_coef{config_.mode2.poly_coef,
+        static_cast<std::size_t>(config_.mode2.num_coef)};
+    ptr->mode2 = static_cast<int8_t>(polyval<float>(mode2_coef,
+                                     ch_[config_.mode2.ch]));
+    /* mode3 */
+    std::span<float> mode3_coef{config_.mode3.poly_coef,
+        static_cast<std::size_t>(config_.mode3.num_coef)};
+    ptr->mode3 = static_cast<int8_t>(polyval<float>(mode3_coef,
+                                     ch_[config_.mode3.ch]));
+    /* throttle */
+    std::span<float> throttle_coef{config_.throttle.poly_coef,
+        static_cast<std::size_t>(config_.throttle.num_coef)};
+    ptr->throttle = polyval<float>(throttle_coef, ch_[config_.throttle.ch]);
+    /* pitch */
+    std::span<float> pitch_coef{config_.pitch.poly_coef,
+        static_cast<std::size_t>(config_.pitch.num_coef)};
+    ptr->pitch = polyval<float>(pitch_coef, ch_[config_.pitch.ch]);
+    /* roll */
+    std::span<float> roll_coef{config_.roll.poly_coef,
+        static_cast<std::size_t>(config_.roll.num_coef)};
+    ptr->roll = polyval<float>(roll_coef, ch_[config_.roll.ch]);
+    /* yaw */
+    std::span<float> yaw_coef{config_.yaw.poly_coef,
+        static_cast<std::size_t>(config_.yaw.num_coef)};
+    ptr->yaw = polyval<float>(yaw_coef, ch_[config_.yaw.ch]);
   }
-  return status;
+  return ptr->new_data;
 }
 bool SbusRx::Parse() {
-  while (bus_->available()) {
-    uint8_t c = bus_->read();
+  while (config_.hw->available()) {
+    uint8_t c = config_.hw->read();
     if (state_ == 0) {
       if ((c == HEADER_) && ((prev_byte_ == FOOTER_) ||
          ((prev_byte_ & 0x0F) == FOOTER2_))) {
@@ -117,90 +157,6 @@ bool SbusRx::Parse() {
     prev_byte_ = c;
   }
   return false;
-}
-
-/* Needed for emulating two stop bytes on Teensy 3.0 and 3.1/3.2 */
-#if defined(__MK20DX128__) || defined(__MK20DX256__)
-namespace {
-  IntervalTimer serial_timer;
-  HardwareSerial *sbus_bus;
-  uint8_t sbus_packet[25];
-  volatile int send_index;
-  void SendByte() {
-    if (send_index < 25) {
-      sbus_bus->write(sbus_packet[send_index]);
-      send_index++;
-    } else {
-      serial_timer.end();
-      send_index = 0;
-    }
-  }
-}  // namespace
-#endif
-
-void SbusTx::Begin(HardwareSerial *bus) {
-  bus_ = bus;
-  #if defined(__MK20DX128__) || defined(__MK20DX256__)
-    bus_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-  #else
-    bus_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
-  #endif
-}
-void SbusTx::Write() {
-  buf_[0] = HEADER_;
-  buf_[1] =  static_cast<uint8_t>((ch_[0]  & 0x07FF));
-  buf_[2] =  static_cast<uint8_t>((ch_[0]  & 0x07FF) >> 8  |
-             (ch_[1]  & 0x07FF) << 3);
-  buf_[3] =  static_cast<uint8_t>((ch_[1]  & 0x07FF) >> 5  |
-             (ch_[2]  & 0x07FF) << 6);
-  buf_[4] =  static_cast<uint8_t>((ch_[2]  & 0x07FF) >> 2);
-  buf_[5] =  static_cast<uint8_t>((ch_[2]  & 0x07FF) >> 10 |
-             (ch_[3]  & 0x07FF) << 1);
-  buf_[6] =  static_cast<uint8_t>((ch_[3]  & 0x07FF) >> 7  |
-             (ch_[4]  & 0x07FF) << 4);
-  buf_[7] =  static_cast<uint8_t>((ch_[4]  & 0x07FF) >> 4  |
-             (ch_[5]  & 0x07FF) << 7);
-  buf_[8] =  static_cast<uint8_t>((ch_[5]  & 0x07FF) >> 1);
-  buf_[9] =  static_cast<uint8_t>((ch_[5]  & 0x07FF) >> 9  |
-             (ch_[6]  & 0x07FF) << 2);
-  buf_[10] = static_cast<uint8_t>((ch_[6]  & 0x07FF) >> 6  |
-             (ch_[7]  & 0x07FF) << 5);
-  buf_[11] = static_cast<uint8_t>((ch_[7]  & 0x07FF) >> 3);
-  buf_[12] = static_cast<uint8_t>((ch_[8]  & 0x07FF));
-  buf_[13] = static_cast<uint8_t>((ch_[8]  & 0x07FF) >> 8  |
-             (ch_[9]  & 0x07FF) << 3);
-  buf_[14] = static_cast<uint8_t>((ch_[9]  & 0x07FF) >> 5  |
-             (ch_[10] & 0x07FF) << 6);
-  buf_[15] = static_cast<uint8_t>((ch_[10] & 0x07FF) >> 2);
-  buf_[16] = static_cast<uint8_t>((ch_[10] & 0x07FF) >> 10 |
-             (ch_[11] & 0x07FF) << 1);
-  buf_[17] = static_cast<uint8_t>((ch_[11] & 0x07FF) >> 7  |
-             (ch_[12] & 0x07FF) << 4);
-  buf_[18] = static_cast<uint8_t>((ch_[12] & 0x07FF) >> 4  |
-             (ch_[13] & 0x07FF) << 7);
-  buf_[19] = static_cast<uint8_t>((ch_[13] & 0x07FF) >> 1);
-  buf_[20] = static_cast<uint8_t>((ch_[13] & 0x07FF) >> 9  |
-             (ch_[14] & 0x07FF) << 2);
-  buf_[21] = static_cast<uint8_t>((ch_[14] & 0x07FF) >> 6  |
-             (ch_[15] & 0x07FF) << 5);
-  buf_[22] = static_cast<uint8_t>((ch_[15] & 0x07FF) >> 3);
-  buf_[23] = 0x00 | (ch17_ * CH17_) | (ch18_ * CH18_) |
-             (failsafe_ * FAILSAFE_) | (lost_frame_ * LOST_FRAME_);
-  buf_[24] = FOOTER_;
-
-  #if defined(__MK20DX128__) || defined(__MK20DX256__)
-    /* 
-    * Use ISR to send byte at a time,
-    * 130 us between bytes to emulate 2 stop bits
-    */
-    __disable_irq();
-    memcpy(sbus_packet, tx_buffer_, sizeof(sbus_packet));
-    __enable_irq();
-    serial_timer.priority(255);
-    serial_timer.begin(SendByte, 130);
-  #else
-    bus_->write(buf_, sizeof(buf_));
-  #endif
 }
 
 }  // namespace bfs

@@ -5,7 +5,7 @@ if (DEFINED MCU)
 endif()
 # Project information
 project(Sbus
-	VERSION 3.0.0
+	VERSION 4.0.0
 	DESCRIPTION "SBUS encoder and decoder"
 	LANGUAGES C CXX
 )
@@ -21,6 +21,27 @@ if (DEFINED MCU)
 		GIT_TAG v2.0.5
 	)
 	FetchContent_MakeAvailable(core)
+  # Fetch inceptor
+	FetchContent_Declare(
+		inceptor
+		GIT_REPOSITORY 	https://github.com/bolderflight/inceptor.git
+		GIT_TAG v2.1.1
+	)
+	FetchContent_MakeAvailable(inceptor)
+	# Fetch effector
+	FetchContent_Declare(
+		effector
+		GIT_REPOSITORY 	https://github.com/bolderflight/effector.git
+		GIT_TAG v6.0.1
+	)
+	FetchContent_MakeAvailable(effector)
+  # Fetch polytools
+	FetchContent_Declare(
+		polytools
+		GIT_REPOSITORY 	https://github.com/bolderflight/polytools.git
+		GIT_TAG v3.0.2
+	)
+	FetchContent_MakeAvailable(polytools)
 	# Add the library target
 	add_library(sbus
 		src/sbus/sbus.cc
@@ -30,6 +51,9 @@ if (DEFINED MCU)
 	target_link_libraries(sbus
 		PUBLIC
 			core
+			inceptor
+			effector
+			polytools
 	)
 	# Setup include directories 
 	target_include_directories(sbus PUBLIC 
