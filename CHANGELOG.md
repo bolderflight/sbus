@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.0
+- Updated to conform to the Inceptor and Effector interfaces
+
 ## v3.0.0
 - Moved the HardwareSerial bus to the *Begin* method
 

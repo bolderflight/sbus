@@ -27,38 +27,57 @@
 
 /* SBUS object, reading SBUS */
 bfs::SbusRx sbus_rx;
+
 /* SBUS object, writing SBUS */
-bfs::SbusTx sbus_tx;
+bfs::SbusTx<16> sbus_tx;
+
+/* Sbus RX data */
+bfs::InceptorData data;
 
 int main() {
   /* Serial to display data */
   Serial.begin(115200);
   while(!Serial) {}
-  /* Begin communicating on SBUS serial */
-  if (!sbus_rx.Begin(&Serial2)) {
+  /* RX Config */
+  bfs::InceptorConfig rx_config = {
+    .hw = &Serial2,
+    .throttle = {
+      .ch = 0,
+      .num_coef = 2,
+      .poly_coef = {0.0012203, -1.2098841}
+    }
+  };
+  if (!sbus_rx.Init(rx_config)) {
     Serial.println("Unable to establish communication with SBUS receiver");
     while (1) {}
   }
-  sbus_tx.Begin(&Serial2);
-  while(1) {
-    /* Check if SBUS packet received */
-    if (sbus_rx.Read()) {
-      /* Grab the received SBUS data */
-      std::array<uint16_t, 16> sbus_data = sbus_rx.rx_channels();
-      bool lost_frame = sbus_rx.lost_frame();
-      bool failsafe = sbus_rx.failsafe();
-      /* Print channel data */
-      for (unsigned int i = 0; i < 16; i++) {
-        Serial.print(sbus_data[i]);
-        Serial.print("\t");
+  /* TX Config */
+  bfs::EffectorConfig<16> tx_config = {
+    .hw = &Serial2,
+    .effectors = {
+      {
+        .type = bfs::SERVO,
+        .ch = 1,
+        .min = -20,
+        .max = 20,
+        .failsafe = 0,
+        .num_coef = 2,
+        .poly_coef = {819.50, 991.50}
       }
-      /* Print lost frames and failsafe */
-      Serial.print(lost_frame);
-      Serial.print("\t");
-      Serial.println(failsafe);
-      /* Copy read SBUS data to transmit buffer */
-      sbus_tx.tx_channels(sbus_data);
-      /* Write SBUS data to servos */
+    }
+  };
+  if (!sbus_tx.Init(tx_config)) {
+    Serial.println("Unable to init SBUS transmitter");
+    while (1) {}
+  }
+  sbus_tx.EnableMotors();
+  sbus_tx.EnableServos();
+  std::array<float, 1> cmds;
+  while (1) {
+    if (sbus_rx.Read(&data)) {
+      Serial.println(data.throttle);
+      cmds[0] = data.throttle;
+      sbus_tx.Cmd(cmds);
       sbus_tx.Write();
     }
   }
