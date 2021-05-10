@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.1
+- Fixing constness of std::span
+
 ## v4.0.0
 - Updated to conform to the Inceptor and Effector interfaces
 
