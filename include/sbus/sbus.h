@@ -81,7 +81,7 @@ class SbusTx {
       return false;
     }
   }
-  void Cmd(std::span<float> cmds) {
+  void Cmd(std::span<const float> cmds) {
     std::size_t len = std::min(cmds.size(), N);
     for (std::size_t i = 0; i < len; i++) {
       /* Saturation */
