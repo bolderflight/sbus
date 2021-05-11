@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.2
+ - Updated for effector v6.1.0
+
 ## v4.0.1
 - Fixing constness of std::span
 
