@@ -100,16 +100,6 @@ bool SbusRx::Read(InceptorData * const ptr) {
         static_cast<std::size_t>(config_.mode1.num_coef)};
     ptr->mode1 = static_cast<int8_t>(polyval<float>(mode1_coef,
                                      ch_[config_.mode1.ch]));
-    /* mode2 */
-    std::span<float> mode2_coef{config_.mode2.poly_coef,
-        static_cast<std::size_t>(config_.mode2.num_coef)};
-    ptr->mode2 = static_cast<int8_t>(polyval<float>(mode2_coef,
-                                     ch_[config_.mode2.ch]));
-    /* mode3 */
-    std::span<float> mode3_coef{config_.mode3.poly_coef,
-        static_cast<std::size_t>(config_.mode3.num_coef)};
-    ptr->mode3 = static_cast<int8_t>(polyval<float>(mode3_coef,
-                                     ch_[config_.mode3.ch]));
     /* throttle */
     std::span<float> throttle_coef{config_.throttle.poly_coef,
         static_cast<std::size_t>(config_.throttle.num_coef)};
