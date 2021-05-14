@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.3
+- Updated for inceptor v2.2.0
+
 ## v4.0.2
  - Updated for effector v6.1.0
 
