@@ -88,8 +88,8 @@ bool SbusRx::Read(InceptorData * const ptr) {
     /* Throttle enable */
     std::span<float> thr_en_coef{config_.throttle_en.poly_coef,
         static_cast<std::size_t>(config_.throttle_en.num_coef)};
-    ptr->throttle_en = static_cast<bool>(polyval<float>(thr_en_coef,
-                                         ch_[config_.throttle_en.ch]));
+    ptr->throttle_en = (polyval<float>(thr_en_coef,
+                                         ch_[config_.throttle_en.ch]) > 0.0f);
     /* mode0 */
     std::span<float> mode0_coef{config_.mode0.poly_coef,
         static_cast<std::size_t>(config_.mode0.num_coef)};

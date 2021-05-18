@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.4
+- throttle_en compared to zero instead of a cast to bool. Now, true if greater than zero.
+
 ## v4.0.3
 - Updated for inceptor v2.2.0
 
