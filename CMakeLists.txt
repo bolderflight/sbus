@@ -5,7 +5,7 @@ if (DEFINED MCU)
 endif()
 # Project information
 project(Sbus
-	VERSION 4.0.4
+	VERSION 4.0.5
 	DESCRIPTION "SBUS encoder and decoder"
 	LANGUAGES C CXX
 )
@@ -32,7 +32,7 @@ if (DEFINED MCU)
 	FetchContent_Declare(
 		effector
 		GIT_REPOSITORY 	https://github.com/bolderflight/effector.git
-		GIT_TAG v6.1.0
+		GIT_TAG v6.1.3
 	)
 	FetchContent_MakeAvailable(effector)
   # Fetch polytools

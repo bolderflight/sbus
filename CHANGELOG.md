@@ -1,5 +1,8 @@
 # Changelog
 
+## v4.0.5
+- Updated to effector v6.1.3, which adds a check to see whether a channel was configured.
+
 ## v4.0.4
 - throttle_en compared to zero instead of a cast to bool. Now, true if greater than zero.
 

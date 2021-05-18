@@ -84,27 +84,30 @@ class SbusTx {
   void Cmd(std::span<const float> cmds) {
     std::size_t len = std::min(cmds.size(), N);
     for (std::size_t i = 0; i < len; i++) {
-      /* Saturation */
-      if (cmds[i] > config_.effectors[i].max) {
-        val_ = config_.effectors[i].max;
-      } else if (cmds[i] < config_.effectors[i].min) {
-        val_ = config_.effectors[i].min;
-      } else {
-        val_ = cmds[i];
+      /* Check whether the channel was configured */
+      if (config_.effectors[i].ch >=0) {
+        /* Saturation */
+        if (cmds[i] > config_.effectors[i].max) {
+          val_ = config_.effectors[i].max;
+        } else if (cmds[i] < config_.effectors[i].min) {
+          val_ = config_.effectors[i].min;
+        } else {
+          val_ = cmds[i];
+        }
+        /* Motor check */
+        if ((config_.effectors[i].type == MOTOR) && (!motors_enabled_)) {
+          val_ = config_.effectors[i].failsafe;
+        }
+        /* Servo check */
+        if ((config_.effectors[i].type == SERVO) && (!servos_enabled_)) {
+          val_ = config_.effectors[i].failsafe;
+        }
+        /* polyval */
+        std::span<float> coef{config_.effectors[i].poly_coef,
+          static_cast<std::size_t>(config_.effectors[i].num_coef)};
+        ch_[config_.effectors[i].ch] = static_cast<uint16_t>(
+                                      polyval<float>(coef, val_));
       }
-      /* Motor check */
-      if ((config_.effectors[i].type == MOTOR) && (!motors_enabled_)) {
-        val_ = config_.effectors[i].failsafe;
-      }
-      /* Servo check */
-      if ((config_.effectors[i].type == SERVO) && (!servos_enabled_)) {
-        val_ = config_.effectors[i].failsafe;
-      }
-      /* polyval */
-      std::span<float> coef{config_.effectors[i].poly_coef,
-        static_cast<std::size_t>(config_.effectors[i].num_coef)};
-      ch_[config_.effectors[i].ch] = static_cast<uint16_t>(
-                                     polyval<float>(coef, val_));
     }
   }
   void Write() {
