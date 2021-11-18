@@ -24,129 +24,139 @@
 */
 
 #include "sbus/sbus.h"
-#include "inceptor/inceptor.h"
-#include "polytools/polytools.h"
 
 namespace bfs {
 
-bool SbusRx::Init(const InceptorConfig &cfg) {
-  /* Copy the config */
-  config_ = cfg;
+bool SbusRx::Init(HardwareSerial *uart) {
+  uart_ = uart;
   /* Start the bus */
-  config_.hw->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
-  /* flush the bus */
-  config_.hw->flush();
+  uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  /* Flush the bus */
+  uart_->flush();
   /* check communication */
   elapsedMillis timer_ms = 0;
   while (timer_ms < TIMEOUT_MS_) {
-    if (Parse()) {
-      bool lost_frame = buf_[23] & LOST_FRAME_;
-      bool failsafe = buf_[23] & FAILSAFE_;
-      if (!failsafe && !lost_frame) {
+    if (Read()) {
+      if (!failsafe_ && !lost_frame_) {
         return true;
       }
     }
   }
   return false;
 }
-bool SbusRx::Read(InceptorData * const ptr) {
-  if (!ptr) {return false;}
+bool SbusRx::Read() {
+  /* Check for null pointer */
+  if (!uart_) {return false;}
   /* Read through all available packets to get the newest */
-  ptr->new_data = false;
+  new_data_ = false;
   do {
     if (Parse()) {
-      ptr->new_data = true;
+      new_data_ = true;
     }
-  } while (config_.hw->available());
+  } while (uart_->available());
   /* Parse new data, if available */
-  if (ptr->new_data) {
+  if (new_data_) {
     /* Grab the channel data */
-    ch_[0]  = static_cast<uint16_t>(buf_[1]       | buf_[2]  << 8 & 0x07FF);
-    ch_[1]  = static_cast<uint16_t>(buf_[2]  >> 3 | buf_[3]  << 5 & 0x07FF);
-    ch_[2]  = static_cast<uint16_t>(buf_[3]  >> 6 | buf_[4]  << 2  |
-              buf_[5] << 10 & 0x07FF);
-    ch_[3]  = static_cast<uint16_t>(buf_[5]  >> 1 | buf_[6]  << 7 & 0x07FF);
-    ch_[4]  = static_cast<uint16_t>(buf_[6]  >> 4 | buf_[7]  << 4 & 0x07FF);
-    ch_[5]  = static_cast<uint16_t>(buf_[7]  >> 7 | buf_[8]  << 1  |
-              buf_[9] << 9 & 0x07FF);
-    ch_[6]  = static_cast<uint16_t>(buf_[9]  >> 2 | buf_[10] << 6 & 0x07FF);
-    ch_[7]  = static_cast<uint16_t>(buf_[10] >> 5 | buf_[11] << 3 & 0x07FF);
-    ch_[8]  = static_cast<uint16_t>(buf_[12]      | buf_[13] << 8 & 0x07FF);
-    ch_[9]  = static_cast<uint16_t>(buf_[13] >> 3 | buf_[14] << 5 & 0x07FF);
-    ch_[10] = static_cast<uint16_t>(buf_[14] >> 6 | buf_[15] << 2  |
-              buf_[16] << 10 & 0x07FF);
-    ch_[11] = static_cast<uint16_t>(buf_[16] >> 1 | buf_[17] << 7 & 0x07FF);
-    ch_[12] = static_cast<uint16_t>(buf_[17] >> 4 | buf_[18] << 4 & 0x07FF);
-    ch_[13] = static_cast<uint16_t>(buf_[18] >> 7 | buf_[19] << 1  |
-              buf_[20] << 9 & 0x07FF);
-    ch_[14] = static_cast<uint16_t>(buf_[20] >> 2 | buf_[21] << 6 & 0x07FF);
-    ch_[15] = static_cast<uint16_t>(buf_[21] >> 5 | buf_[22] << 3 & 0x07FF);
+    ch_[0]  = static_cast<int16_t>(buf_[1]       | buf_[2]  << 8 & 0x07FF);
+    ch_[1]  = static_cast<int16_t>(buf_[2]  >> 3 | buf_[3]  << 5 & 0x07FF);
+    ch_[2]  = static_cast<int16_t>(buf_[3]  >> 6 | buf_[4]  << 2  |
+                                   buf_[5] << 10 & 0x07FF);
+    ch_[3]  = static_cast<int16_t>(buf_[5]  >> 1 | buf_[6]  << 7 & 0x07FF);
+    ch_[4]  = static_cast<int16_t>(buf_[6]  >> 4 | buf_[7]  << 4 & 0x07FF);
+    ch_[5]  = static_cast<int16_t>(buf_[7]  >> 7 | buf_[8]  << 1  |
+                                   buf_[9] << 9 & 0x07FF);
+    ch_[6]  = static_cast<int16_t>(buf_[9]  >> 2 | buf_[10] << 6 & 0x07FF);
+    ch_[7]  = static_cast<int16_t>(buf_[10] >> 5 | buf_[11] << 3 & 0x07FF);
+    ch_[8]  = static_cast<int16_t>(buf_[12]      | buf_[13] << 8 & 0x07FF);
+    ch_[9]  = static_cast<int16_t>(buf_[13] >> 3 | buf_[14] << 5 & 0x07FF);
+    ch_[10] = static_cast<int16_t>(buf_[14] >> 6 | buf_[15] << 2  |
+                                   buf_[16] << 10 & 0x07FF);
+    ch_[11] = static_cast<int16_t>(buf_[16] >> 1 | buf_[17] << 7 & 0x07FF);
+    ch_[12] = static_cast<int16_t>(buf_[17] >> 4 | buf_[18] << 4 & 0x07FF);
+    ch_[13] = static_cast<int16_t>(buf_[18] >> 7 | buf_[19] << 1  |
+                                   buf_[20] << 9 & 0x07FF);
+    ch_[14] = static_cast<int16_t>(buf_[20] >> 2 | buf_[21] << 6 & 0x07FF);
+    ch_[15] = static_cast<int16_t>(buf_[21] >> 5 | buf_[22] << 3 & 0x07FF);
+    /* CH 17 */
+    ch17_ = buf_[23] & CH17_MASK_;
+    /* CH 18 */
+    ch18_ = buf_[23] & CH18_MASK_;
     /* Grab the lost frame */
-    ptr->lost_frame = buf_[23] & LOST_FRAME_;
+    lost_frame_ = buf_[23] & LOST_FRAME_MASK_;
     /* Grab the failsafe */
-    ptr->failsafe = buf_[23] & FAILSAFE_;
-    /* Throttle enable */
-    std::span<float> thr_en_coef{config_.throttle_en.poly_coef,
-        static_cast<std::size_t>(config_.throttle_en.num_coef)};
-    ptr->throttle_en = (polyval<float>(thr_en_coef,
-                                         ch_[config_.throttle_en.ch]) > 0.0f);
-    /* mode0 */
-    std::span<float> mode0_coef{config_.mode0.poly_coef,
-        static_cast<std::size_t>(config_.mode0.num_coef)};
-    ptr->mode0 = static_cast<int8_t>(polyval<float>(mode0_coef,
-                                     ch_[config_.mode0.ch]));
-    /* mode1 */
-    std::span<float> mode1_coef{config_.mode1.poly_coef,
-        static_cast<std::size_t>(config_.mode1.num_coef)};
-    ptr->mode1 = static_cast<int8_t>(polyval<float>(mode1_coef,
-                                     ch_[config_.mode1.ch]));
-    /* throttle */
-    std::span<float> throttle_coef{config_.throttle.poly_coef,
-        static_cast<std::size_t>(config_.throttle.num_coef)};
-    ptr->throttle = polyval<float>(throttle_coef, ch_[config_.throttle.ch]);
-    /* pitch */
-    std::span<float> pitch_coef{config_.pitch.poly_coef,
-        static_cast<std::size_t>(config_.pitch.num_coef)};
-    ptr->pitch = polyval<float>(pitch_coef, ch_[config_.pitch.ch]);
-    /* roll */
-    std::span<float> roll_coef{config_.roll.poly_coef,
-        static_cast<std::size_t>(config_.roll.num_coef)};
-    ptr->roll = polyval<float>(roll_coef, ch_[config_.roll.ch]);
-    /* yaw */
-    std::span<float> yaw_coef{config_.yaw.poly_coef,
-        static_cast<std::size_t>(config_.yaw.num_coef)};
-    ptr->yaw = polyval<float>(yaw_coef, ch_[config_.yaw.ch]);
+    failsafe_ = buf_[23] & FAILSAFE_MASK_;
   }
-  return ptr->new_data;
+  return new_data_;
 }
 bool SbusRx::Parse() {
-  while (config_.hw->available()) {
-    uint8_t c = config_.hw->read();
+  /* Check for null pointer */
+  if (!uart_) {return false;}
+  /* Parse messages */
+  while (uart_->available()) {
+    cur_byte_ = uart_->read();
     if (state_ == 0) {
-      if ((c == HEADER_) && ((prev_byte_ == FOOTER_) ||
+      if ((cur_byte_ == HEADER_) && ((prev_byte_ == FOOTER_) ||
          ((prev_byte_ & 0x0F) == FOOTER2_))) {
-        buf_[state_] = c;
-        state_++;
+        buf_[state_++] = cur_byte_;
       } else {
         state_ = 0;
       }
     } else {
-      if (state_ < LEN_) {
-        buf_[state_] = c;
-        state_++;
+      if (state_ < BUF_LEN_) {
+        buf_[state_++] = cur_byte_;
       } else {
         state_ = 0;
-        if ((buf_[LEN_ - 1] == FOOTER_) ||
-           ((buf_[LEN_ - 1] & 0x0F) == FOOTER2_)) {
+        if ((buf_[BUF_LEN_ - 1] == FOOTER_) ||
+           ((buf_[BUF_LEN_ - 1] & 0x0F) == FOOTER2_)) {
           return true;
         } else {
           return false;
         }
       }
     }
-    prev_byte_ = c;
+    prev_byte_ = cur_byte_;
   }
   return false;
+}
+
+void SbusTx::Init(HardwareSerial *uart) {
+  uart_ = uart;
+  /* Start the bus */
+  uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+}
+
+void SbusTx::Write() {
+  /* Check for NULL pointer */
+  if (!uart_) {return;}
+  /* Assemble packet */
+  buf_[0] = HEADER_;
+  buf_[1] =   (uint8_t) ((ch_[0]   & 0x07FF));
+  buf_[2] =   (uint8_t) ((ch_[0]   & 0x07FF) >> 8  | (ch_[1]  & 0x07FF) << 3);
+  buf_[3] =   (uint8_t) ((ch_[1]   & 0x07FF) >> 5  | (ch_[2]  & 0x07FF) << 6);
+  buf_[4] =   (uint8_t) ((ch_[2]   & 0x07FF) >> 2);
+  buf_[5] =   (uint8_t) ((ch_[2]   & 0x07FF) >> 10 | (ch_[3]  & 0x07FF) << 1);
+  buf_[6] =   (uint8_t) ((ch_[3]   & 0x07FF) >> 7  | (ch_[4]  & 0x07FF) << 4);
+  buf_[7] =   (uint8_t) ((ch_[4]   & 0x07FF) >> 4  | (ch_[5]  & 0x07FF) << 7);
+  buf_[8] =   (uint8_t) ((ch_[5]   & 0x07FF) >> 1);
+  buf_[9] =   (uint8_t) ((ch_[5]   & 0x07FF) >> 9  | (ch_[6]  & 0x07FF) << 2);
+  buf_[10] =  (uint8_t) ((ch_[6]   & 0x07FF) >> 6  | (ch_[7]  & 0x07FF) << 5);
+  buf_[11] =  (uint8_t) ((ch_[7]   & 0x07FF) >> 3);
+  buf_[12] =  (uint8_t) ((ch_[8]   & 0x07FF));
+  buf_[13] =  (uint8_t) ((ch_[8]   & 0x07FF) >> 8  | (ch_[9]  & 0x07FF) << 3);
+  buf_[14] =  (uint8_t) ((ch_[9]   & 0x07FF) >> 5  | (ch_[10] & 0x07FF) << 6);
+  buf_[15] =  (uint8_t) ((ch_[10]  & 0x07FF) >> 2);
+  buf_[16] =  (uint8_t) ((ch_[10]  & 0x07FF) >> 10 | (ch_[11] & 0x07FF) << 1);
+  buf_[17] =  (uint8_t) ((ch_[11]  & 0x07FF) >> 7  | (ch_[12] & 0x07FF) << 4);
+  buf_[18] =  (uint8_t) ((ch_[12]  & 0x07FF) >> 4  | (ch_[13] & 0x07FF) << 7);
+  buf_[19] =  (uint8_t) ((ch_[13]  & 0x07FF) >> 1);
+  buf_[20] =  (uint8_t) ((ch_[13]  & 0x07FF) >> 9  | (ch_[14] & 0x07FF) << 2);
+  buf_[21] =  (uint8_t) ((ch_[14]  & 0x07FF) >> 6  | (ch_[15] & 0x07FF) << 5);
+  buf_[22] =  (uint8_t) ((ch_[15]  & 0x07FF) >> 3);
+  buf_[23] = 0x00 | (ch17_ * CH17_MASK_) | (ch18_ * CH18_MASK_) |
+             (failsafe_ * FAILSAFE_MASK_) | (lost_frame_ * LOST_FRAME_MASK_);
+  buf_[24] = FOOTER_;
+  /* Send packet to servos */
+  uart_->write(buf_, sizeof(buf_));
 }
 
 }  // namespace bfs

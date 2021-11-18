@@ -1,5 +1,8 @@
 # Changelog
 
+## v5.0.0
+- 
+
 ## v4.0.5
 - Updated to effector v6.1.3, which adds a check to see whether a channel was configured.
 
