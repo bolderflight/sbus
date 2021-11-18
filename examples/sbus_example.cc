@@ -27,57 +27,36 @@
 
 /* SBUS object, reading SBUS */
 bfs::SbusRx sbus_rx;
-
 /* SBUS object, writing SBUS */
-bfs::SbusTx<16> sbus_tx;
-
-/* Sbus RX data */
-bfs::InceptorData data;
+bfs::SbusTx sbus_tx;
 
 int main() {
   /* Serial to display data */
   Serial.begin(115200);
   while(!Serial) {}
   /* RX Config */
-  bfs::InceptorConfig rx_config = {
-    .hw = &Serial2,
-    .throttle = {
-      .ch = 0,
-      .num_coef = 2,
-      .poly_coef = {0.0012203, -1.2098841}
-    }
-  };
-  if (!sbus_rx.Init(rx_config)) {
-    Serial.println("Unable to establish communication with SBUS receiver");
-    while (1) {}
-  }
+  Serial.print("Initializing SBUS receiver...");
+  while (!sbus_rx.Init(&Serial2)) {}
+  Serial.println("done.");
   /* TX Config */
-  bfs::EffectorConfig<16> tx_config = {
-    .hw = &Serial2,
-    .effectors = {
-      {
-        .type = bfs::SERVO,
-        .ch = 1,
-        .min = -20,
-        .max = 20,
-        .failsafe = 0,
-        .num_coef = 2,
-        .poly_coef = {819.50, 991.50}
-      }
-    }
-  };
-  if (!sbus_tx.Init(tx_config)) {
-    Serial.println("Unable to init SBUS transmitter");
-    while (1) {}
-  }
-  sbus_tx.EnableMotors();
-  sbus_tx.EnableServos();
-  std::array<float, 1> cmds;
+  sbus_tx.Init(&Serial2);
   while (1) {
-    if (sbus_rx.Read(&data)) {
-      Serial.println(data.throttle);
-      cmds[0] = data.throttle;
-      sbus_tx.Cmd(cmds);
+    if (sbus_rx.Read()) {
+      /* Print the SBUS data */
+      Serial.print(sbus_rx.lost_frame());
+      Serial.print("\t");
+      Serial.print(sbus_rx.failsafe());
+      Serial.print("\t");
+      std::array<int16_t, bfs::SbusRx::NUM_CH> data = sbus_rx.ch();
+      for (std::size_t i = 0; i < data.size(); i++) {
+        Serial.print(data[i]);
+        Serial.print("\t");
+      }
+      Serial.print(sbus_rx.ch17());
+      Serial.print("\t");
+      Serial.println(sbus_rx.ch18());
+      /* Write the SBUS data */
+      sbus_tx.ch(data);
       sbus_tx.Write();
     }
   }
