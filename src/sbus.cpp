@@ -26,9 +26,18 @@
 #include "Arduino.h"
 #include "sbus.h"
 
+#ifdef ESP32
+SbusRx::SbusRx(HardwareSerial *bus, uint8_t rxpin, uint8_t txpin) {
+  bus_ = bus;
+  rxpin_ = rxpin;
+  txpin_ = txpin;
+}
+#else
 SbusRx::SbusRx(HardwareSerial *bus) {
   bus_ = bus;
 }
+#endif
+
 void SbusRx::Begin() {
   parser_state_ = 0;
   previous_byte_ = SBUS_FOOTER_;
@@ -44,7 +53,10 @@ void SbusRx::Begin() {
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
     bus_->begin(BAUD_, SERIAL_SBUS);
-  /* Everything else, with a hardware inverter */
+  /* ESP32 */
+  #elif defined(ESP32)
+    bus_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, true);
+   /* Everything else, with a hardware inverter */
   #else
     bus_->begin(BAUD_, SERIAL_8E2);
   #endif
@@ -137,9 +149,18 @@ namespace {
 }  // namespace
 #endif
 
+#ifdef ESP32
+SbusTx::SbusTx(HardwareSerial *bus, uint8_t rxpin, uint8_t txpin) {
+  bus_ = bus;
+  rxpin_ = rxpin;
+  txpin_ = txpin;
+}
+#else
 SbusTx::SbusTx(HardwareSerial *bus) {
   bus_ = bus;
 }
+#endif
+
 void SbusTx::Begin() {
   /* Teensy 3.0 || Teensy 3.1/3.2 */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
@@ -153,6 +174,9 @@ void SbusTx::Begin() {
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
     bus_->begin(BAUD_, SERIAL_SBUS);
+  /* ESP32 */
+  #elif defined(ESP32)
+    bus_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, true);
   /* Everything else, with a hardware inverter */
   #else
     bus_->begin(BAUD_, SERIAL_8E2);
