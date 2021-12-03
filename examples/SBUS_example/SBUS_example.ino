@@ -52,7 +52,7 @@ void setup() {
 void loop() {
   if (sbus_rx.Read()) {
     /* Display the received data */
-    for (int i = 0; i < sbus_rx.rx_channels().size(); i++) {
+    for (uint8_t i = 0; i < sbus_rx.rx_channels().size(); i++) {
       Serial.print(sbus_rx.rx_channels()[i]);
       Serial.print("\t");
     }

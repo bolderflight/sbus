@@ -43,13 +43,14 @@ namespace sbus = std;
 class SbusRx {
  public:
 
-#ifdef ESP32
-  explicit SbusRx(HardwareSerial *bus, uint8_t rxpin, uint8_t txpin); // supports ESP32
-#else
   explicit SbusRx(HardwareSerial *bus);
+
+#ifdef ESP32
+  void Begin(uint8_t rxpin, uint8_t txpin);
+#else
+  void Begin();
 #endif
 
-  void Begin();
   bool Read();
   sbus::array<uint16_t, 16> rx_channels();
   inline bool failsafe() const {return failsafe_;}
@@ -60,11 +61,6 @@ class SbusRx {
  private:
   /* Communication */
   HardwareSerial *bus_;
-
-#ifdef ESP32
-  uint8_t rxpin_ = 0;
-  uint8_t txpin_ = 0;
-#endif
 
   static constexpr uint32_t BAUD_ = 100000;
   /* Parsing */
@@ -88,13 +84,14 @@ class SbusRx {
 class SbusTx {
  public:
 
-#ifdef ESP32
-  explicit SbusTx(HardwareSerial *bus, uint8_t rxpin, uint8_t txpin);
-#else
   explicit SbusTx(HardwareSerial *bus);
+
+#ifdef ESP32
+  void Begin(uint8_t rxpin, uint8_t txpin);
+#else
+  void Begin();
 #endif
 
-  void Begin();
   void Write();
   void failsafe(bool val) {failsafe_ = val;}
   void lost_frame(bool val) {lost_frame_ = val;}
@@ -110,11 +107,6 @@ class SbusTx {
  private:
   /* Communication */
   HardwareSerial *bus_;
-
-#ifdef ESP32
-  uint8_t rxpin_ = 0; 
-  uint8_t txpin_ = 0; 
-#endif
 
   static constexpr uint32_t BAUD_ = 100000;
   /* Parsing */
