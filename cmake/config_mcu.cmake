@@ -3,7 +3,6 @@ macro (configMcu MCU)
   # Add math libraries
   link_directories(${CMAKE_SOURCE_DIR}/lib)
   # MCU specific config
-<<<<<<< HEAD
   if (MCU STREQUAL "MK20DX128")
     message("Configuring MK20DX128 build.")
     # Setup def for the loader
@@ -103,9 +102,6 @@ macro (configMcu MCU)
       -lstdc++
     )
   elseif (MCU STREQUAL "MK64FX512")
-=======
-  if (MCU STREQUAL "MK64FX512")
->>>>>>> gitlab/main
     message("Configuring MK64FX512 build.")
     # Setup def for the loader
     set(MCU_LOAD mk64fx512)
@@ -115,21 +111,12 @@ macro (configMcu MCU)
       -D__MK64FX512__
       -DF_CPU=120000000 
       -DUSB_SERIAL
-<<<<<<< HEAD
       -DTEENSYDUINO=153
-=======
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
->>>>>>> gitlab/main
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-<<<<<<< HEAD
       $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
-=======
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
->>>>>>> gitlab/main
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -177,21 +164,12 @@ macro (configMcu MCU)
       -D__MK66FX1M0__
       -DF_CPU=180000000 
       -DUSB_SERIAL
-<<<<<<< HEAD
       -DTEENSYDUINO=153
-=======
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
->>>>>>> gitlab/main
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-<<<<<<< HEAD
       $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
-=======
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
->>>>>>> gitlab/main
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -239,21 +217,12 @@ macro (configMcu MCU)
       -D__MKL26Z64__
       -DF_CPU=48000000 
       -DUSB_SERIAL
-<<<<<<< HEAD
       -DTEENSYDUINO=153
-=======
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
->>>>>>> gitlab/main
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-<<<<<<< HEAD
       $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
-=======
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
->>>>>>> gitlab/main
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -298,20 +267,12 @@ macro (configMcu MCU)
       -DF_CPU=528000000 
       -DUSB_SERIAL
       -DTEENSYDUINO=153
-<<<<<<< HEAD
-=======
-      -DARDUINO=10810
->>>>>>> gitlab/main
       -DARDUINO_TEENSY40
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
-<<<<<<< HEAD
       $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
-=======
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
->>>>>>> gitlab/main
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -360,21 +321,12 @@ macro (configMcu MCU)
       -DF_CPU=528000000 
       -DUSB_SERIAL
       -DTEENSYDUINO=153
-<<<<<<< HEAD
       -DARDUINO_TEENSY41
-=======
-      -DARDUINO=10810
-      -DARDUINO_TEENSY40
->>>>>>> gitlab/main
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
-<<<<<<< HEAD
       $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
-=======
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
->>>>>>> gitlab/main
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
