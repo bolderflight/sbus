@@ -1,5 +1,8 @@
 # Changelog
 
+## v6.0.2
+- Removed the tools folder to fix Arduino linting
+
 ## v6.0.1
 - Fixing library.properties version number
 
