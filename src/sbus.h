@@ -23,104 +23,129 @@
 * IN THE SOFTWARE.
 */
 
-#ifndef INCLUDE_SBUS_SBUS_H_
-#define INCLUDE_SBUS_SBUS_H_
+#ifndef SRC_SBUS_H_
+#define SRC_SBUS_H_
 
-
-#if defined(__AVR__)
-#define ETL_NO_STL
-#include "Arduino.h"
-#include <Embedded_Template_Library.h>
-#include <etl/array.h>
-namespace sbus = etl;
+#if defined(ARDUINO)
+#include <Arduino.h>
+#if !defined(TEENSYDUINO) && defined(AVR)
+#define NO_STD_ARRAY
 #else
-#include "Arduino.h"
 #include <array>
-namespace sbus = std;
+#endif
+#else
+#include <algorithm>
+#include <array>
+#include "core/core.h"
 #endif
 
+namespace bfs {
 
 class SbusRx {
+ private:
+  /* Communication */
+  HardwareSerial *uart_;
+  static constexpr uint32_t BAUD_ = 100000;
+  /* Message len */
+  static constexpr int8_t BUF_LEN_ = 25;
+  /* SBUS message defs */
+  static constexpr int8_t NUM_SBUS_CH_ = 16;
+  static constexpr uint8_t HEADER_ = 0x0F;
+  static constexpr uint8_t FOOTER_ = 0x00;
+  static constexpr uint8_t FOOTER2_ = 0x04;
+  static constexpr uint8_t CH17_MASK_ = 0x01;
+  static constexpr uint8_t CH18_MASK_ = 0x02;
+  static constexpr uint8_t LOST_FRAME_MASK_ = 0x04;
+  static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
+  /* Parsing state tracking */
+  int8_t state_ = 0;
+  uint8_t prev_byte_ = FOOTER_;
+  uint8_t cur_byte_;
+  /* Buffer for storing messages */
+  uint8_t buf_[BUF_LEN_];
+  /* Data */
+  bool new_data_;
+  #if !defined(NO_STD_ARRAY)
+  std::array<int16_t, NUM_SBUS_CH_> ch_;
+  #else
+  int16_t ch_[NUM_SBUS_CH_];
+  #endif
+  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
+  bool Parse();
+
  public:
-
-  explicit SbusRx(HardwareSerial *bus);
-
-#ifdef ESP32
-  void Begin(uint8_t rxpin, uint8_t txpin);
-#else
+  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
+  #if defined(ESP32)
+  void Begin(const int8_t rxpin, const int8_t txpin);
+  #else
   void Begin();
-#endif
-
+  #endif
   bool Read();
-  sbus::array<uint16_t, 16> rx_channels();
+  static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
+  #if !defined(NO_STD_ARRAY)
+  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
+  #endif
+  int8_t ch(int16_t * data, const int8_t len);
+  int16_t ch(const int8_t idx);
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
   inline bool ch17() const {return ch17_;}
   inline bool ch18() const {return ch18_;}
-
- private:
-  /* Communication */
-  HardwareSerial *bus_;
-
-  static constexpr uint32_t BAUD_ = 100000;
-  /* Parsing */
-  static constexpr uint8_t SBUS_HEADER_ = 0x0F;
-  static constexpr uint8_t SBUS_FOOTER_ = 0x00;
-  static constexpr uint8_t SBUS2_FOOTER_ = 0x04;
-  static constexpr uint8_t SBUS_LENGTH_ = 25;
-  static constexpr uint8_t SBUS_CH17_ = 0x01;
-  static constexpr uint8_t SBUS_CH18_ = 0x02;
-  static constexpr uint8_t SBUS_LOST_FRAME_ = 0x04;
-  static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;
-  unsigned int parser_state_ = 0;
-  uint8_t previous_byte_ = SBUS_FOOTER_;
-  uint8_t rx_buffer_[SBUS_LENGTH_];
-  /* Data */
-  sbus::array<uint16_t, 16> rx_channels_;
-  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
-  bool Parse();
 };
 
 class SbusTx {
+ private:
+  /* Communication */
+  HardwareSerial *uart_;
+  static constexpr uint32_t BAUD_ = 100000;
+  /* Message len */
+  static constexpr int8_t BUF_LEN_ = 25;
+  /* SBUS message defs */
+  static constexpr int8_t NUM_SBUS_CH_ = 16;
+  static constexpr uint8_t HEADER_ = 0x0F;
+  static constexpr uint8_t FOOTER_ = 0x00;
+  static constexpr uint8_t FOOTER2_ = 0x04;
+  static constexpr uint8_t CH17_MASK_ = 0x01;
+  static constexpr uint8_t CH18_MASK_ = 0x02;
+  static constexpr uint8_t LOST_FRAME_MASK_ = 0x04;
+  static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
+  /* Data */
+  uint8_t buf_[BUF_LEN_];
+  #if !defined(NO_STD_ARRAY)
+  std::array<int16_t, NUM_SBUS_CH_> ch_;
+  #else
+  int16_t ch_[NUM_SBUS_CH_];
+  #endif
+  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
+
  public:
-
-  explicit SbusTx(HardwareSerial *bus);
-
-#ifdef ESP32
-  void Begin(uint8_t rxpin, uint8_t txpin);
-#else
+  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
+  #if defined(ESP32)
+  void Begin(const int8_t rxpin, const int8_t txpin);
+  #else
   void Begin();
-#endif
-
+  #endif
   void Write();
-  void failsafe(bool val) {failsafe_ = val;}
-  void lost_frame(bool val) {lost_frame_ = val;}
-  void ch17(bool val) {ch17_ = val;}
-  void ch18(bool val) {ch18_ = val;}
-  void tx_channels(const sbus::array<uint16_t, 16> &val);
+  static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
+  inline void failsafe(const bool val) {failsafe_ = val;}
+  inline void lost_frame(const bool val) {lost_frame_ = val;}
+  inline void ch17(const bool val) {ch17_ = val;}
+  inline void ch18(const bool val) {ch18_ = val;}
+  #if !defined(NO_STD_ARRAY)
+  inline void ch(const std::array<int16_t, NUM_SBUS_CH_> &val) {ch_ = val;}
+  #endif
+  bool ch(const int8_t idx, const int16_t val);
+  int8_t ch(int16_t const * const data, const int8_t len);
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
   inline bool ch17() const {return ch17_;}
   inline bool ch18() const {return ch18_;}
-  sbus::array<uint16_t, 16> tx_channels();
-
- private:
-  /* Communication */
-  HardwareSerial *bus_;
-
-  static constexpr uint32_t BAUD_ = 100000;
-  /* Parsing */
-  static constexpr uint8_t SBUS_HEADER_ = 0x0F;
-  static constexpr uint8_t SBUS_FOOTER_ = 0x00;
-  static constexpr uint8_t SBUS_LENGTH_ = 25;
-  static constexpr uint8_t SBUS_CH17_ = 0x01;
-  static constexpr uint8_t SBUS_CH18_ = 0x02;
-  static constexpr uint8_t SBUS_LOST_FRAME_ = 0x04;
-  static constexpr uint8_t SBUS_FAILSAFE_ = 0x08;
-  uint8_t tx_buffer_[SBUS_LENGTH_];
-  /* Data */
-  sbus::array<uint16_t, 16> tx_channels_;
-  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
+  #if !defined(NO_STD_ARRAY)
+  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
+  #endif
+  int16_t ch(const int8_t idx);
 };
 
-#endif  // INCLUDE_SBUS_SBUS_H_
+}  // namespace bfs
+
+#endif  // SRC_SBUS_H_

@@ -1,1 +1,4 @@
-.vscode/*
+# ignore the build directory
+build/
+# ignore vs code
+*.vscode
