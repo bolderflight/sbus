@@ -1,7 +1,7 @@
 # Changelog
 
-## v5.0.0
-- Merging CMake and Arduino SBUS libraries. Version 5 is the next available version number common between the two.
+## v6.0.0
+- Merging CMake and Arduino SBUS libraries. Version 6 is the next available version number common between the two.
 
 ## v2.1.2
 - Added Embedded Template Library support for AVR boards.
