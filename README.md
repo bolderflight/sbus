@@ -14,10 +14,10 @@ The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 da
    * Byte[0]: SBUS header, 0x0F
    * Byte[1 -22]: 16 servo channels, 11 bits each
    * Byte[23]
-      * Bit 7: channel 17 (0x80)
-      * Bit 6: channel 18 (0x40)
-      * Bit 5: frame lost (0x20)
-      * Bit 4: failsafe activated (0x10)
+      * Bit 0: channel 17 (0x01)
+      * Bit 1: channel 18 (0x02)
+      * Bit 2: frame lost (0x04)
+      * Bit 3: failsafe activated (0x08)
    * Byte[24]: SBUS footer
 
 Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that many frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms or 20 ms. 
@@ -105,12 +105,6 @@ if (sbus.Read()) {
 
 **static constexpr int8_t NUM_CH()** A constant defining the number of SBUS channels (i.e. 16), useful for defining arrays to read the data into.
 
-**(Non-AVR ONLY) std::array<uint16_t, 16> ch()** Returns the array of received channel data.
-
-```C++
-std::array<uint16_t, 16> sbus_data = sbus.ch();
-```
-
 **int8_t ch(int16_t * data, const int8_t len)** Copys the array of received channel data given a pointer to a destination, *data*, and length of the destination array *len*. Returns the number of channels copied on success or -1 on failure. Note that the maximum number of channels is the smaller of the *len* or *NUM_CH* (i.e. 16).
 
 ```C++
@@ -197,12 +191,6 @@ sbus.lost_frame(true);
 sbus.failsafe(true);
 ```
 
-**(Non-AVR ONLY) void ch(const std::array<uint16_t, 16> &val)** Sets the channel data to be transmitted.
-
-```C++
-sbus.ch(sbus_tx_data);
-```
-
 **bool ch(const int8_t idx, const int16_t val)** Sets the channel data to be transmitted, given a channel index and corresponding value. Returns true on success and false on failure.
 
 ```C++
@@ -215,41 +203,4 @@ sbus.ch(3, 1200);
 ```C++
 int16_t cmd[bfs::SbusTx::NUM_CH()];
 sbus.ch(cmd, bfs::SbusTx::NUM_CH());
-```
-
-**bool ch17()** Returns the value of channel 17 to be transmitted.
-
-```C++
-bool ch17 = sbus.ch17();
-```
-
-**bool ch18()** Returns the value of channel 18 to be transmitted.
-
-```C++
-bool ch18 = sbus.ch18();
-```
-
-**bool lost_frame()** Returns the lost frame flag value to be transmitted.
-
-```C++
-bool lost_frame = sbus.lost_frame();
-```
-
-**bool failsafe()** Returns the failsafe flag value to be transmitted.
-
-```C++
-bool failsafe = sbus.failsafe();
-```
-
-**(Non-AVR ONLY) std::array<uint16_t, 16> ch()** Returns the array of channel data to be transmitted.
-
-```C++
-std::array<uint16_t, 16> sbus_tx_data = sbus.ch();
-```
-
-**int16_t ch(const int8_t idx)** Returns the channel data to be transmitted, given an index.
-
-```C++
-/* Get the command for channel 3 */
-int16_t data = sbus.ch(3);
 ```

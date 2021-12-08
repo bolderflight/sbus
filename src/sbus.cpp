@@ -26,14 +26,8 @@
 #include "sbus.h"  // NOLINT
 #if defined(ARDUINO)
 #include <Arduino.h>
-#if !defined(TEENSYDUINO) && defined(AVR)
-#define NO_STD_ARRAY
-#else
-#include <array>
-#endif
 #else
 #include <algorithm>
-#include <array>
 #include "core/core.h"
 #endif
 
@@ -56,7 +50,7 @@ void SbusRx::Begin() {
   /* STM32L4 */
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
-    uart_->begin(BAUD_, SERIAL_SBUS);
+    uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
   /* ESP32 */
   #elif defined(ESP32)
     uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, true);
@@ -116,11 +110,7 @@ int8_t SbusRx::ch(int16_t * data, const int8_t len) {
   #else
   int8_t cpy_len = std::min(NUM_SBUS_CH_, len);
   #endif
-  #if defined(NO_STD_ARRAY)
   memcpy(data, ch_, cpy_len * sizeof(int16_t));
-  #else
-  memcpy(data, ch_.data(), cpy_len * sizeof(int16_t));
-  #endif
   return cpy_len;
 }
 int16_t SbusRx::ch(const int8_t idx) {
@@ -192,7 +182,7 @@ void SbusTx::Begin() {
   /* STM32L4 */
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
-  uart_->begin(BAUD_, SERIAL_SBUS);
+  uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
   /* ESP32 */
   #elif defined(ESP32)
   uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, true);
@@ -256,16 +246,8 @@ int8_t SbusTx::ch(int16_t const * const data, const int8_t len) {
   #else
   int8_t cpy_len = std::min(NUM_SBUS_CH_, len);
   #endif
-  #if defined(NO_STD_ARRAY)
   memcpy(ch_, data, cpy_len * sizeof(int16_t));
-  #else
-  memcpy(ch_.data(), data, cpy_len * sizeof(int16_t));
-  #endif
   return cpy_len;
-}
-int16_t SbusTx::ch(const int8_t idx) {
-  if ((idx < 0) || (idx >= NUM_SBUS_CH_)) {return -1;}
-  return ch_[idx];
 }
 
 }  // namespace bfs
