@@ -3,7 +3,105 @@ macro (configMcu MCU)
   # Add math libraries
   link_directories(${CMAKE_SOURCE_DIR}/lib)
   # MCU specific config
-  if (MCU STREQUAL "MK64FX512")
+  if (MCU STREQUAL "MK20DX128")
+    message("Configuring MK20DX128 build.")
+    # Setup def for the loader
+    set(MCU_LOAD mk20dx128)
+    # Definitions
+    add_definitions(
+      -D__MCU__
+      -D__MK20DX128__
+      -DF_CPU=48000000 
+      -DUSB_SERIAL
+      -DTEENSYDUINO=153
+    )
+    # Compile options
+    add_compile_options(
+      $<$<COMPILE_LANGUAGE:C>:-std=c11>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
+      $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+      $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
+      $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
+      -g 
+      -Os 
+      -Wno-psabi 
+      -mthumb 
+      -ffunction-sections 
+      -fdata-sections 
+      -nostdlib 
+      -MMD
+      -mcpu=cortex-m4 
+    )
+    # Linker script
+    set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/ld/mk20dx128.ld")
+    # Link options
+    add_link_options(
+      -Os 
+      --specs=nano.specs
+      LINKER:--defsym=__rtc_localtime=0
+      -Wl,--gc-sections,--relax
+      -mcpu=cortex-m4 
+      -T${LINKER_SCRIPT}
+    )
+    # Link libraries
+    link_libraries(
+      -larm_cortexM4l_math
+      -lm 
+      -lc
+      -lstdc++
+    )
+  elseif (MCU STREQUAL "MK20DX256")
+    message("Configuring MK20DX256 build.")
+    # Setup def for the loader
+    set(MCU_LOAD mk20dx256)
+    # Definitions
+    add_definitions(
+      -D__MCU__
+      -D__MK20DX256__
+      -DF_CPU=72000000 
+      -DUSB_SERIAL
+      -DTEENSYDUINO=153
+    )
+    # Compile options
+    add_compile_options(
+      $<$<COMPILE_LANGUAGE:C>:-std=c11>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
+      $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+      $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
+      $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
+      -g 
+      -Os 
+      -Wno-psabi 
+      -mthumb 
+      -ffunction-sections 
+      -fdata-sections 
+      -nostdlib 
+      -MMD
+      -mcpu=cortex-m4 
+    )
+    # Linker script
+    set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/ld/mk20dx256.ld")
+    # Link options
+    add_link_options(
+      -Os 
+      --specs=nano.specs
+      LINKER:--defsym=__rtc_localtime=0
+      -Wl,--gc-sections,--relax
+      -mcpu=cortex-m4 
+      -T${LINKER_SCRIPT}
+    )
+    # Link libraries
+    link_libraries(
+      -larm_cortexM4l_math
+      -lm 
+      -lc
+      -lstdc++
+    )
+  elseif (MCU STREQUAL "MK64FX512")
     message("Configuring MK64FX512 build.")
     # Setup def for the loader
     set(MCU_LOAD mk64fx512)
@@ -13,13 +111,12 @@ macro (configMcu MCU)
       -D__MK64FX512__
       -DF_CPU=120000000 
       -DUSB_SERIAL
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
+      -DTEENSYDUINO=153
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -67,13 +164,12 @@ macro (configMcu MCU)
       -D__MK66FX1M0__
       -DF_CPU=180000000 
       -DUSB_SERIAL
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
+      -DTEENSYDUINO=153
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -121,13 +217,12 @@ macro (configMcu MCU)
       -D__MKL26Z64__
       -DF_CPU=48000000 
       -DUSB_SERIAL
-      -DTEENSYDUINO=141  
-      -DARDUINO=10805
+      -DTEENSYDUINO=153
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=c11>
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -172,13 +267,12 @@ macro (configMcu MCU)
       -DF_CPU=528000000 
       -DUSB_SERIAL
       -DTEENSYDUINO=153
-      -DARDUINO=10810
       -DARDUINO_TEENSY40
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>
@@ -227,13 +321,12 @@ macro (configMcu MCU)
       -DF_CPU=528000000 
       -DUSB_SERIAL
       -DTEENSYDUINO=153
-      -DARDUINO=10810
-      -DARDUINO_TEENSY40
+      -DARDUINO_TEENSY41
     )
     # Compile options
     add_compile_options(
       $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
-      $<$<COMPILE_LANGUAGE:CXX>:-std=c++20>
+      $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
       $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
       $<$<COMPILE_LANGUAGE:CXX>:-felide-constructors>
       $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=narrowing>

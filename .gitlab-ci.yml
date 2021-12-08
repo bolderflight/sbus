@@ -6,6 +6,6 @@ Lint:
   tags:
     - bfs
   script: 
-    - cpplint --verbose=0 src/sbus/sbus.cc
-    - cpplint --verbose=0 include/sbus/sbus.h
+    - cpplint --verbose=0 src/sbus.cpp
+    - cpplint --verbose=0 src/sbus.h
   

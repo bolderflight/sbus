@@ -5,7 +5,7 @@ if (DEFINED MCU)
 endif()
 # Project information
 project(Sbus
-	VERSION 5.0.0
+	VERSION 6.0.0
 	DESCRIPTION "SBUS encoder and decoder"
 	LANGUAGES C CXX
 )
@@ -18,13 +18,13 @@ if (DEFINED MCU)
 	FetchContent_Declare(
 		core
 		GIT_REPOSITORY 	https://github.com/bolderflight/core.git
-		GIT_TAG v2.0.5
+		GIT_TAG v3.0.0
 	)
 	FetchContent_MakeAvailable(core)
 	# Add the library target
 	add_library(sbus
-		src/sbus/sbus.cc
-		include/sbus/sbus.h
+		src/sbus.cpp
+		src/sbus.h
 	)
 	# Link libraries
 	target_link_libraries(sbus
@@ -33,7 +33,7 @@ if (DEFINED MCU)
 	)
 	# Setup include directories 
 	target_include_directories(sbus PUBLIC 
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 		$<INSTALL_INTERFACE:include>
 	)
 
@@ -42,7 +42,7 @@ endif()
 if (PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
 	if (DEFINED MCU)		
 		# Add the example target
-		add_executable(sbus_example examples/sbus_example.cc)
+		add_executable(sbus_example examples/cmake/sbus_example.cc)
 		# Add the includes
 		target_include_directories(sbus_example PUBLIC 
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
