@@ -1,5 +1,8 @@
 # Changelog
 
+## v6.0.1
+- Fixing library.properties version number
+
 ## v6.0.0
 - Merging CMake and Arduino SBUS libraries. Version 6 is the next available version number common between the two.
 
