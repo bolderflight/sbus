@@ -105,7 +105,7 @@ if (sbus.Read()) {
 
 **static constexpr int8_t NUM_CH()** A constant defining the number of SBUS channels (i.e. 16), useful for defining arrays to read the data into.
 
-**int8_t ch(int16_t * data, const int8_t len)** Copys the array of received channel data given a pointer to a destination, *data*, and length of the destination array *len*. Returns the number of channels copied on success or -1 on failure. Note that the maximum number of channels is the smaller of the *len* or *NUM_CH* (i.e. 16).
+**int8_t ch(int16_t * const data, const int8_t len)** Copys the array of received channel data given a pointer to a destination, *data*, and length of the destination array *len*. Returns the number of channels copied on success or -1 on failure. Note that the maximum number of channels is the smaller of the *len* or *NUM_CH* (i.e. 16).
 
 ```C++
 int16_t rx_ch[bfs::SbusRx::NUM_CH];

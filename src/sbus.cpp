@@ -42,7 +42,11 @@ void SbusRx::Begin() {
   /* Teensy 3.0 || Teensy 3.1/3.2 */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
     uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-  /* Teensy 3.5 || Teensy 3.6 || Teensy 4.0/4.1 || Teensy 4.0 Beta */
+  /*
+  * Teensy 3.5 || Teensy 3.6 ||
+  * Teensy LC  || Teensy 4.0/4.1 ||
+  * Teensy 4.0 Beta
+  */
   #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
         defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
         defined(__IMXRT1052__)
@@ -103,7 +107,7 @@ bool SbusRx::Read() {
   }
   return new_data_;
 }
-int8_t SbusRx::ch(int16_t * data, const int8_t len) {
+int8_t SbusRx::ch(int16_t * const data, const int8_t len) {
   if (!data) {return -1;}
   #if defined(ARDUINO)
   int8_t cpy_len = min(NUM_SBUS_CH_, len);
@@ -174,7 +178,11 @@ void SbusTx::Begin() {
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
   uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
   sbus_bus = uart_;
-  /* Teensy 3.5 || Teensy 3.6 || Teensy 4.0/4.1 || Teensy 4.0 Beta */
+  /*
+  * Teensy 3.5 || Teensy 3.6 ||
+  * Teensy LC  || Teensy 4.0/4.1 ||
+  * Teensy 4.0 Beta
+  */
   #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
         defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
         defined(__IMXRT1052__)

@@ -3,6 +3,7 @@
 ## v6.0.3
 - Cleaned up folder structure after merge
 - Pulling in mcu-support repo for CMake builds
+- Fixed pointer constness for SbusRx
 
 ## v6.0.2
 - Removed the tools folder to fix Arduino linting
