@@ -72,7 +72,7 @@ class SbusRx {
   #endif
   bool Read();
   static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
-  int8_t ch(int16_t * data, const int8_t len);
+  int8_t ch(int16_t * const data, const int8_t len);
   int16_t ch(const int8_t idx);
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
