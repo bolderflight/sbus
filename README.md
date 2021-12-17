@@ -3,9 +3,10 @@
 ![Bolder Flight Systems Logo](img/logo-words_75.png) &nbsp; &nbsp; ![Arduino Logo](img/arduino_logo_75.png)
 
 # Sbus
-This library communicates with SBUS receivers and servos and is compatible with Arduino and CMake build systems.
+This library communicates with SBUS receivers and servos and is compatible with Arduino ARM and CMake build systems.
    * [License](LICENSE.md)
    * [Changelog](CHANGELOG.md)
+   * [Contributing guide](CONTRIBUTING.md)
 
 # Description
 SBUS is a bus protocol for receivers to send commands to servos. Unlike PWM, SBUS uses a bus architecture where a single serial line can be connected with up to 16 servos with each receiving a unique command.
@@ -20,7 +21,7 @@ The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 da
       * Bit 3: failsafe activated (0x08)
    * Byte[24]: SBUS footer
 
-Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that many frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms or 20 ms. 
+Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that many frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms or 20 ms, depending on the system configuration.
 
 **Note on CH17 and CH18:** Channel 17 and channel 18 are digital on/off channels. These are not universally available on all SBUS receivers and servos.
 
@@ -49,6 +50,8 @@ Simply clone or download and extract the zipped library into your Arduino/librar
 ```C++
 #include "sbus.h"
 ```
+
+An example is located in *examples/arduino/sbus_example/sbus_example.ino*. This library is tested with Teensy 3.x, 4.x, and LC devices and should work with other ARM devices. It is **not** expected to work with AVR due to the use of std::array.
 
 ## CMake
 CMake is used to build this library, which is exported as a library target called *sbus*. The header is added as:
@@ -84,7 +87,7 @@ This class is used for receiving SBUS data from an SBUS capable receiver.
 **SbusRx(HardwareSerial &ast;bus)** Creates an SbusRx object. A pointer to the Serial object corresponding to the serial port used is passed. The RX pin of the serial port will receive SBUS packets.
 
 ```C++
-SbusRx sbus(&Serial1);
+bfs::SbusRx sbus(&Serial1);
 ```
 
 **void Begin()** Initializes SBUS communication.
@@ -105,17 +108,10 @@ if (sbus.Read()) {
 
 **static constexpr int8_t NUM_CH()** A constant defining the number of SBUS channels (i.e. 16), useful for defining arrays to read the data into.
 
-**int8_t ch(int16_t * const data, const int8_t len)** Copys the array of received channel data given a pointer to a destination, *data*, and length of the destination array *len*. Returns the number of channels copied on success or -1 on failure. Note that the maximum number of channels is the smaller of the *len* or *NUM_CH* (i.e. 16).
+**std::array<int16_t, NUM_SBUS_CH_> ch()** Returns an array of received channel data.
 
 ```C++
-int16_t rx_ch[bfs::SbusRx::NUM_CH];
-sbus.ch(rx_ch, bfs::SbusRx::NUM_CH);
-```
-
-**int16_t ch(const int8_t idx)** Returns received channel data given the channel index.
-
-```C++
-int16_t ch3_data = sbus.ch(3);
+std::array<int16_t, bfs::SbusRx::NUM_CH()> rx_ch = sbus.ch();
 ```
 
 **bool ch17()** Returns the value of channel 17.
@@ -148,7 +144,7 @@ This class is used for transmitting SBUS data to SBUS capable servos.
 **SbusTx(HardwareSerial &ast;bus)** Creates an SbusTx object. A pointer to the Serial object corresponding to the serial port used is passed. The TX pin of the serial port will transmit SBUS packets.
 
 ```C++
-SbusTx sbus(&Serial1);
+bfs::SbusTx sbus(&Serial1);
 ```
 
 **void Begin()** Initializes SBUS communication.
@@ -191,16 +187,40 @@ sbus.lost_frame(true);
 sbus.failsafe(true);
 ```
 
-**bool ch(const int8_t idx, const int16_t val)** Sets the channel data to be transmitted, given a channel index and corresponding value. Returns true on success and false on failure.
+**void ch(const std::array<int16_t, NUM_SBUS_CH_> &cmd)** Sets the channel data to be transmitted given an array of SBUS commands.
 
 ```C++
-/* Set channel 3 to a value of 1200 */
-sbus.ch(3, 1200);
+/* Set SBUS commands */
+std::array<int16_t, bfs::SbusTx::NUM_CH()> cmd;
+sbus.ch(cmd);
 ```
 
-**int8_t ch(int16_t const * const data, const int8_t len)** Sets the channel data to be transmitted given a pointer to an array of commands, *data*, and the array length, *len*. Returns the number of channels copied on success or -1 on failure. Note that the maximum number of channels is the smaller of the *len* or *NUM_CH* (i.e. 16).
+**bool ch17()** Returns the CH17 data to be transmitted.
 
 ```C++
-int16_t cmd[bfs::SbusTx::NUM_CH()];
-sbus.ch(cmd, bfs::SbusTx::NUM_CH());
+bool ch17 = sbus.ch17();
+```
+
+**bool ch18()** Returns the CH18 data to be transmitted.
+
+```C++
+bool ch18 = sbus.ch18();
+```
+
+**bool lost_frame()** Returns the lost frame flag to be transmitted.
+
+```C++
+bool lost_frame = sbus.lost_frame();
+```
+
+**bool failsafe()** Returns the failsafe flag to be transmitted.
+
+```C++
+bool failsafe = sbus.failsafe();
+```
+
+**std::array<int16_t, NUM_SBUS_CH_> ch()** Returns the channel data to be transmitted.
+
+```C++
+std::array<int16_t, bfs::SbusRx::NUM_CH()> rx_ch = sbus.ch();
 ```

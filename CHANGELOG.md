@@ -1,5 +1,8 @@
 # Changelog
 
+## v7.0.0
+- Using std::array for passing around SBUS data and commands
+
 ## v6.0.3
 - Cleaned up folder structure after merge
 - Pulling in mcu-support repo for CMake builds

@@ -27,9 +27,12 @@
 #if defined(ARDUINO)
 #include <Arduino.h>
 #else
-#include <algorithm>
 #include "core/core.h"
 #endif
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <array>
 
 namespace bfs {
 
@@ -106,20 +109,6 @@ bool SbusRx::Read() {
     failsafe_ = buf_[23] & FAILSAFE_MASK_;
   }
   return new_data_;
-}
-int8_t SbusRx::ch(int16_t * const data, const int8_t len) {
-  if (!data) {return -1;}
-  #if defined(ARDUINO)
-  int8_t cpy_len = min(NUM_SBUS_CH_, len);
-  #else
-  int8_t cpy_len = std::min(NUM_SBUS_CH_, len);
-  #endif
-  memcpy(data, ch_, cpy_len * sizeof(int16_t));
-  return cpy_len;
-}
-int16_t SbusRx::ch(const int8_t idx) {
-  if ((idx < 0) || (idx >= NUM_SBUS_CH_)) {return -1;}
-  return ch_[idx];
 }
 bool SbusRx::Parse() {
   /* Parse messages */
@@ -241,21 +230,6 @@ void SbusTx::Write() {
   #else
   uart_->write(buf_, sizeof(buf_));
   #endif
-}
-bool SbusTx::ch(const int8_t idx, const int16_t val) {
-  if ((idx < 0) || (idx >= NUM_SBUS_CH_)) {return false;}
-  ch_[idx] = val;
-  return true;
-}
-int8_t SbusTx::ch(int16_t const * const data, const int8_t len) {
-  if (!data) {return -1;}
-  #if defined(ARDUINO)
-  int8_t cpy_len = min(NUM_SBUS_CH_, len);
-  #else
-  int8_t cpy_len = std::min(NUM_SBUS_CH_, len);
-  #endif
-  memcpy(ch_, data, cpy_len * sizeof(int16_t));
-  return cpy_len;
 }
 
 }  // namespace bfs
