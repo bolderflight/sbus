@@ -29,9 +29,12 @@
 #if defined(ARDUINO)
 #include <Arduino.h>
 #else
-#include <algorithm>
 #include "core/core.h"
 #endif
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <array>
 
 namespace bfs {
 
@@ -59,7 +62,7 @@ class SbusRx {
   uint8_t buf_[BUF_LEN_];
   /* Data */
   bool new_data_;
-  int16_t ch_[NUM_SBUS_CH_];
+  std::array<int16_t, NUM_SBUS_CH_> ch_;
   bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
   bool Parse();
 
@@ -72,8 +75,7 @@ class SbusRx {
   #endif
   bool Read();
   static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
-  int8_t ch(int16_t * const data, const int8_t len);
-  int16_t ch(const int8_t idx);
+  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
   inline bool failsafe() const {return failsafe_;}
   inline bool lost_frame() const {return lost_frame_;}
   inline bool ch17() const {return ch17_;}
@@ -98,7 +100,7 @@ class SbusTx {
   static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
   /* Data */
   uint8_t buf_[BUF_LEN_];
-  int16_t ch_[NUM_SBUS_CH_];
+  std::array<int16_t, NUM_SBUS_CH_> ch_;
   bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
 
  public:
@@ -114,8 +116,12 @@ class SbusTx {
   inline void lost_frame(const bool val) {lost_frame_ = val;}
   inline void ch17(const bool val) {ch17_ = val;}
   inline void ch18(const bool val) {ch18_ = val;}
-  bool ch(const int8_t idx, const int16_t val);
-  int8_t ch(int16_t const * const data, const int8_t len);
+  inline void ch(const std::array<int16_t, NUM_SBUS_CH_> &cmd) {ch_ = cmd;}
+  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
+  inline bool failsafe() const {return failsafe_;}
+  inline bool lost_frame() const {return lost_frame_;}
+  inline bool ch17() const {return ch17_;}
+  inline bool ch18() const {return ch18_;}
 };
 
 }  // namespace bfs

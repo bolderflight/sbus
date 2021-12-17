@@ -30,7 +30,7 @@ bfs::SbusRx sbus_rx(&Serial1);
 /* SBUS object, writing SBUS */
 bfs::SbusTx sbus_tx(&Serial1);
 /* Array for storing SBUS data */
-int16_t sbus_data[bfs::SbusRx::NUM_CH()];
+std::array<int16_t, bfs::SbusRx::NUM_CH()> sbus_data;
 
 int main() {
   /* Serial to display data */
@@ -41,9 +41,10 @@ int main() {
   sbus_tx.Begin();
   while (1) {
     if (sbus_rx.Read()) {
+      /* Grab the received data */
+      sbus_data = sbus_rx.ch();
       /* Display the received data */
       for (int8_t i = 0; i < bfs::SbusRx::NUM_CH(); i++) {
-        sbus_data[i] = sbus_rx.ch(i);
         Serial.print(sbus_data[i]);
         Serial.print("\t");
       }
@@ -52,7 +53,7 @@ int main() {
       Serial.print("\t");
       Serial.println(sbus_rx.failsafe());
       /* Set the SBUS TX data to the received data */
-      sbus_tx.ch(sbus_data, bfs::SbusRx::NUM_CH());
+      sbus_tx.ch(sbus_data);
       /* Write the data to the servos */
       sbus_tx.Write();
     }
