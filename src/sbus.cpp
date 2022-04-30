@@ -37,7 +37,7 @@
 namespace bfs {
 
 #if defined(ESP32)
-void SbusRx::Begin(const int8_t rxpin, const int8_t txpin) {
+void SbusRx::Begin(const int8_t rxpin, const int8_t txpin, bool inverted=true) {
 #else
 void SbusRx::Begin() {
 #endif
@@ -60,7 +60,7 @@ void SbusRx::Begin() {
     uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
   /* ESP32 */
   #elif defined(ESP32)
-    uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, true);
+    uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, inverted);
   /* Everything else, with a hardware inverter */
   #else
     uart_->begin(BAUD_, SERIAL_8E2);
@@ -159,7 +159,7 @@ namespace {
 #endif
 
 #if defined(ESP32)
-void SbusTx::Begin(const int8_t rxpin, const int8_t txpin) {
+void SbusTx::Begin(const int8_t rxpin, const int8_t txpin, bool inverted=true) {
 #else
 void SbusTx::Begin() {
 #endif
@@ -182,7 +182,7 @@ void SbusTx::Begin() {
   uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
   /* ESP32 */
   #elif defined(ESP32)
-  uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, true);
+  uart_->begin(BAUD_, SERIAL_8E2, rxpin, txpin, inverted);
   /* Everything else, with a hardware inverter */
   #else
   uart_->begin(BAUD_, SERIAL_8E2);
