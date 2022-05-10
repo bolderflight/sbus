@@ -69,7 +69,7 @@ class SbusRx {
  public:
   explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
   #if defined(ESP32)
-  void Begin(const int8_t rxpin, const int8_t txpin);
+  void Begin(const int8_t rxpin, const int8_t txpin, bool inverted);
   #else
   void Begin();
   #endif
@@ -106,7 +106,7 @@ class SbusTx {
  public:
   explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
   #if defined(ESP32)
-  void Begin(const int8_t rxpin, const int8_t txpin);
+  void Begin(const int8_t rxpin, const int8_t txpin, bool inverted);
   #else
   void Begin();
   #endif
