@@ -75,7 +75,7 @@ bool SbusRx::Read() {
     if (Parse()) {
       new_data_ = true;
     }
-  } while (uart_->available());
+  } while (uart_->available() && !new_data_);
   /* Parse new data, if available */
   if (new_data_) {
     /* Grab the channel data */
