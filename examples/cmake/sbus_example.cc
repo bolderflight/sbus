@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -26,11 +26,11 @@
 #include "sbus.h"
 
 /* SBUS object, reading SBUS */
-bfs::SbusRx sbus_rx(&Serial1);
+bfs::SbusRx sbus_rx(&Serial2);
 /* SBUS object, writing SBUS */
-bfs::SbusTx sbus_tx(&Serial1);
-/* Array for storing SBUS data */
-std::array<int16_t, bfs::SbusRx::NUM_CH()> sbus_data;
+bfs::SbusTx sbus_tx(&Serial2);
+/* SBUS data */
+bfs::SbusData data;
 
 int main() {
   /* Serial to display data */
@@ -42,18 +42,18 @@ int main() {
   while (1) {
     if (sbus_rx.Read()) {
       /* Grab the received data */
-      sbus_data = sbus_rx.ch();
+      data = sbus_rx.data();
       /* Display the received data */
-      for (int8_t i = 0; i < bfs::SbusRx::NUM_CH(); i++) {
-        Serial.print(sbus_data[i]);
+      for (int8_t i = 0; i < data.NUM_CH; i++) {
+        Serial.print(data.ch[i]);
         Serial.print("\t");
       }
       /* Display lost frames and failsafe data */
-      Serial.print(sbus_rx.lost_frame());
+      Serial.print(data.lost_frame);
       Serial.print("\t");
-      Serial.println(sbus_rx.failsafe());
+      Serial.println(data.failsafe);
       /* Set the SBUS TX data to the received data */
-      sbus_tx.ch(sbus_data);
+      sbus_tx.data(data);
       /* Write the data to the servos */
       sbus_tx.Write();
     }

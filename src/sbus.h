@@ -2,7 +2,7 @@
 * Brian R Taylor
 * brian.taylor@bolderflight.com
 * 
-* Copyright (c) 2021 Bolder Flight Systems Inc
+* Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the “Software”), to
@@ -29,22 +29,46 @@
 #if defined(ARDUINO)
 #include <Arduino.h>
 #else
-#include "core/core.h"
-#endif
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
-#include <array>
+#include "core/core.h"
+#endif
 
 namespace bfs {
 
+struct SbusData {
+  bool lost_frame;
+  bool failsafe;
+  bool ch17, ch18;
+  static constexpr int8_t NUM_CH = 16;
+  int16_t ch[NUM_CH];
+};
+
 class SbusRx {
+ public:
+  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
+  SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  #if defined(ESP32)
+  SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+         const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
+         {}
+  #endif
+  void Begin();
+  bool Read();
+  inline SbusData data() const {return data_;}
+
  private:
   /* Communication */
   HardwareSerial *uart_;
+  bool inv_ = true;
+  #if defined(ESP32)
+  int8_t rxpin_, txpin_;
+  #endif
   static constexpr uint32_t BAUD_ = 100000;
   /* Message len */
-  static constexpr int8_t BUF_LEN_ = 25;
+  static constexpr int8_t PAYLOAD_LEN_ = 23;
+  static constexpr int8_t HEADER_LEN_ = 1;
+  static constexpr int8_t FOOTER_LEN_ = 1;
   /* SBUS message defs */
   static constexpr int8_t NUM_SBUS_CH_ = 16;
   static constexpr uint8_t HEADER_ = 0x0F;
@@ -59,33 +83,34 @@ class SbusRx {
   uint8_t prev_byte_ = FOOTER_;
   uint8_t cur_byte_;
   /* Buffer for storing messages */
-  uint8_t buf_[BUF_LEN_];
+  uint8_t buf_[25];
   /* Data */
   bool new_data_;
-  std::array<int16_t, NUM_SBUS_CH_> ch_;
-  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
+  SbusData data_;
   bool Parse();
-
- public:
-  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
-  #if defined(ESP32)
-  void Begin(const int8_t rxpin, const int8_t txpin);
-  #else
-  void Begin();
-  #endif
-  bool Read();
-  static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
-  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
-  inline bool failsafe() const {return failsafe_;}
-  inline bool lost_frame() const {return lost_frame_;}
-  inline bool ch17() const {return ch17_;}
-  inline bool ch18() const {return ch18_;}
 };
 
 class SbusTx {
+ public:
+  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
+  SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  #if defined(ESP32)
+  SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+         const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
+         {}
+  #endif
+  void Begin();
+  void Write();
+  inline void data(const SbusData &data) {data_ = data;}
+  inline SbusData data() const {return data_;}
+
  private:
   /* Communication */
   HardwareSerial *uart_;
+  bool inv_ = true;
+  #if defined(ESP32)
+  int8_t rxpin_, txpin_;
+  #endif
   static constexpr uint32_t BAUD_ = 100000;
   /* Message len */
   static constexpr int8_t BUF_LEN_ = 25;
@@ -100,28 +125,7 @@ class SbusTx {
   static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
   /* Data */
   uint8_t buf_[BUF_LEN_];
-  std::array<int16_t, NUM_SBUS_CH_> ch_;
-  bool failsafe_ = false, lost_frame_ = false, ch17_ = false, ch18_ = false;
-
- public:
-  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
-  #if defined(ESP32)
-  void Begin(const int8_t rxpin, const int8_t txpin);
-  #else
-  void Begin();
-  #endif
-  void Write();
-  static constexpr int8_t NUM_CH() {return NUM_SBUS_CH_;}
-  inline void failsafe(const bool val) {failsafe_ = val;}
-  inline void lost_frame(const bool val) {lost_frame_ = val;}
-  inline void ch17(const bool val) {ch17_ = val;}
-  inline void ch18(const bool val) {ch18_ = val;}
-  inline void ch(const std::array<int16_t, NUM_SBUS_CH_> &cmd) {ch_ = cmd;}
-  inline std::array<int16_t, NUM_SBUS_CH_> ch() const {return ch_;}
-  inline bool failsafe() const {return failsafe_;}
-  inline bool lost_frame() const {return lost_frame_;}
-  inline bool ch17() const {return ch17_;}
-  inline bool ch18() const {return ch18_;}
+  SbusData data_;
 };
 
 }  // namespace bfs

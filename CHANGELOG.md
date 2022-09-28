@@ -1,5 +1,12 @@
 # Changelog
 
+## v8.0.0
+- Fixed bug in SbusRx timing where the last packet waited for the start of the next packet before returning true
+- Added option to specify a non-inverted signal for cases where that is a hardware option
+- Removed std::array dependency to facilitate use on Arduino AVR
+- Updated ESP32 implementation for greater consistency to other processors
+- Implemented data struct to ease reading and setting SBUS values without needing std::array
+
 ## v7.0.0
 - Using std::array for passing around SBUS data and commands
 
