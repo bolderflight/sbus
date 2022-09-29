@@ -50,9 +50,16 @@ class SbusRx {
   SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
+  SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+         const bool inv, const bool fast) : uart_(bus), inv_(inv),
+                                            rxpin_(rxpin), txpin_(txpin),
+                                            fast_(fast) {}
   #else
   explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
   SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  SbusRx(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
+                                                                 inv_(inv),
+                                                                 fast_(fast) {}
   #endif
   void Begin();
   bool Read();
@@ -62,10 +69,11 @@ class SbusRx {
   /* Communication */
   HardwareSerial *uart_;
   bool inv_ = true;
+  bool fast_ = false;
   #if defined(ESP32)
   int8_t rxpin_, txpin_;
   #endif
-  static constexpr uint32_t BAUD_ = 100000;
+  int32_t baud_ = 100000;
   /* Message len */
   static constexpr int8_t PAYLOAD_LEN_ = 23;
   static constexpr int8_t HEADER_LEN_ = 1;
@@ -97,9 +105,16 @@ class SbusTx {
   SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
+  SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+         const bool inv, const bool fast) : uart_(bus), inv_(inv),
+                                            rxpin_(rxpin), txpin_(txpin),
+                                            fast_(fast) {}
   #else
   explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
   SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  SbusTx(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
+                                                                 inv_(inv),
+                                                                 fast_(fast) {}
   #endif
   void Begin();
   void Write();
@@ -110,10 +125,11 @@ class SbusTx {
   /* Communication */
   HardwareSerial *uart_;
   bool inv_ = true;
+  bool fast_ = false;
   #if defined(ESP32)
   int8_t rxpin_, txpin_;
   #endif
-  static constexpr uint32_t BAUD_ = 100000;
+  int32_t baud_ = 100000;
   /* Message len */
   static constexpr int8_t BUF_LEN_ = 25;
   /* SBUS message defs */

@@ -23,6 +23,8 @@ The SBUS protocol uses an inverted serial logic with a baud rate of 100000, 8 da
 
 Note that lost frame is indicated when a frame is lost between the transmitter and receiver. Failsafe activation typically requires that many frames are lost in a row and indicates that the receiver has moved into failsafe mode. Packets are sent approximately every 10 ms or 20 ms, depending on the system configuration.
 
+A variation on SBUS called "Fast SBUS" has started to be used. This uses a baudrate of 200000 and a quicker update rate.
+
 **Note on CH17 and CH18:** Channel 17 and channel 18 are digital on/off channels. These are not universally available on all SBUS receivers and servos.
 
 FrSky receivers will output a range of 172 - 1811 with channels set to a range of -100% to +100%. Using extended limits of -150% to +150% outputs a range of 0 to 2047, which is the maximum range acheivable with 11 bits of data.
@@ -112,7 +114,11 @@ bfs::SbusRx sbus(&Serial1);
 bfs::SbusRx sbus(&Serial1, false);
 ```
 
+**SbusRx(HardwareSerial &ast;bus, const bool inv, const bool fast)** Same as the constructor above, but enables selecting the fast SBUS baudrate (200000) if *fast* is true.
+
 **(ESP32 ONLY) SbusRx(HardwareSerial &ast;bus, const int8_t rxpin, const int8_t txpin, const bool inv)** Creates an *SbusRx* object. A pointer to the *Serial* object corresponding to the serial port used is passed along with the RX pin number (*rxpin*), TX pin number (*txpin*), and whether inverted serial is used (*inv*). If *inv* is true, the signal is the standard inverted SBUS, otherwise it is non-inverted SBUS.
+
+**(ESP32 ONLY) SbusRx(HardwareSerial &ast;bus, const int8_t rxpin, const int8_t txpin, const bool inv, const bool fast)** Same as the constructor above, but enables selecting the fast SBUS baudrate (200000) if *fast* is true.
 
 **void Begin()** Initializes SBUS communication.
 

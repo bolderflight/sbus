@@ -12,7 +12,7 @@ if (DEFINED MCU)
   set(CMAKE_TOOLCHAIN_FILE "${mcu_support_SOURCE_DIR}/cmake/cortex.cmake")
   # Project information
   project(Sbus
-    VERSION 8.0.0
+    VERSION 8.1.0
     DESCRIPTION "SBUS encoder and decoder"
     LANGUAGES C CXX
   )

@@ -35,13 +35,18 @@
 namespace bfs {
 
 void SbusRx::Begin() {
+  if (fast_) {
+    baud_ = 200000;
+  } else {
+    baud_ = 100000;
+  }
   /* Start the bus */
   /* Teensy 3.0 || Teensy 3.1/3.2 */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
   if (inv_) {
-    uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
+    uart_->begin(baud_, SERIAL_8E1_RXINV_TXINV);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E1);
+    uart_->begin(baud_, SERIAL_8E1);
   }
   /*
   * Teensy 3.5 || Teensy 3.6 ||
@@ -52,24 +57,24 @@ void SbusRx::Begin() {
         defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
         defined(__IMXRT1052__)
   if (inv_){
-    uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+    uart_->begin(baud_, SERIAL_8E2_RXINV_TXINV);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E2);
+    uart_->begin(baud_, SERIAL_8E2);
   }
   /* STM32L4 */
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
   if (inv_) {
-    uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
+    uart_->begin(baud_, SERIAL_8E2 | 0xC000ul);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E2);
+    uart_->begin(baud_, SERIAL_8E2);
   }
   /* ESP32 */
   #elif defined(ESP32)
-  uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, inv_);
+  uart_->begin(baud_, SERIAL_8E2, rxpin_, txpin_, inv_);
   /* Everything else, with a hardware inverter */
   #else
-  uart_->begin(BAUD_, SERIAL_8E2);
+  uart_->begin(baud_, SERIAL_8E2);
   #endif
   /* flush the bus */
   uart_->flush();
@@ -174,13 +179,18 @@ namespace {
 #endif
 
 void SbusTx::Begin() {
+  if (fast_) {
+    baud_ = 200000;
+  } else {
+    baud_ = 100000;
+  }
   /* Start the bus */
   /* Teensy 3.0 || Teensy 3.1/3.2 */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
   if (inv_) {
-    uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
+    uart_->begin(baud_, SERIAL_8E1_RXINV_TXINV);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E1);
+    uart_->begin(baud_, SERIAL_8E1);
   }
   /*
   * Teensy 3.5 || Teensy 3.6 ||
@@ -191,24 +201,24 @@ void SbusTx::Begin() {
         defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
         defined(__IMXRT1052__)
   if (inv_){
-    uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+    uart_->begin(baud_, SERIAL_8E2_RXINV_TXINV);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E2);
+    uart_->begin(baud_, SERIAL_8E2);
   }
   /* STM32L4 */
   #elif defined(STM32L496xx) || defined(STM32L476xx) || \
         defined(STM32L433xx) || defined(STM32L432xx)
   if (inv_) {
-    uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
+    uart_->begin(baud_, SERIAL_8E2 | 0xC000ul);
   } else {
-    uart_->begin(BAUD_, SERIAL_8E2);
+    uart_->begin(baud_, SERIAL_8E2);
   }
   /* ESP32 */
   #elif defined(ESP32)
-  uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, inv_);
+  uart_->begin(baud_, SERIAL_8E2, rxpin_, txpin_, inv_);
   /* Everything else, with a hardware inverter */
   #else
-  uart_->begin(BAUD_, SERIAL_8E2);
+  uart_->begin(baud_, SERIAL_8E2);
   #endif
 }
 

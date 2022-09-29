@@ -1,5 +1,8 @@
 # Changelog
 
+## v8.1.0
+- Added option for fast SBUS (200000 baud)
+
 ## v8.0.1
 - Enabling ESP32 to use non-inverted SBUS
 
