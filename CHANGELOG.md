@@ -1,5 +1,8 @@
 # Changelog
 
+## v8.0.1
+- Enabling ESP32 to use non-inverted SBUS
+
 ## v8.0.0
 - Fixed bug in SbusRx timing where the last packet waited for the start of the next packet before returning true
 - Added option to specify a non-inverted signal for cases where that is a hardware option

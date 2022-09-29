@@ -46,12 +46,13 @@ struct SbusData {
 
 class SbusRx {
  public:
-  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
-  SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
   #if defined(ESP32)
   SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
+  #else
+  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
+  SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
   #endif
   void Begin();
   bool Read();
@@ -92,12 +93,13 @@ class SbusRx {
 
 class SbusTx {
  public:
-  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
-  SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
   #if defined(ESP32)
   SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
+  #else
+  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
+  SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
   #endif
   void Begin();
   void Write();

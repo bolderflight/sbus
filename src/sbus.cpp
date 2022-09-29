@@ -35,34 +35,42 @@
 namespace bfs {
 
 void SbusRx::Begin() {
-  if (!inv_) {
-    uart_->begin(BAUD_, SERIAL_8E2);
+  /* Start the bus */
+  /* Teensy 3.0 || Teensy 3.1/3.2 */
+  #if defined(__MK20DX128__) || defined(__MK20DX256__)
+  if (inv_) {
+    uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
   } else {
-    /* Start the bus */
-    /* Teensy 3.0 || Teensy 3.1/3.2 */
-    #if defined(__MK20DX128__) || defined(__MK20DX256__)
-      uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-    /*
-    * Teensy 3.5 || Teensy 3.6 ||
-    * Teensy LC  || Teensy 4.0/4.1 ||
-    * Teensy 4.0 Beta
-    */
-    #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
-          defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
-          defined(__IMXRT1052__)
-      uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
-    /* STM32L4 */
-    #elif defined(STM32L496xx) || defined(STM32L476xx) || \
-          defined(STM32L433xx) || defined(STM32L432xx)
-      uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
-    /* ESP32 */
-    #elif defined(ESP32)
-      uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, true);
-    /* Everything else, with a hardware inverter */
-    #else
-      uart_->begin(BAUD_, SERIAL_8E2);
-    #endif
+    uart_->begin(BAUD_, SERIAL_8E1);
   }
+  /*
+  * Teensy 3.5 || Teensy 3.6 ||
+  * Teensy LC  || Teensy 4.0/4.1 ||
+  * Teensy 4.0 Beta
+  */
+  #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
+        defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
+        defined(__IMXRT1052__)
+  if (inv_){
+    uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  } else {
+    uart_->begin(BAUD_, SERIAL_8E2);
+  }
+  /* STM32L4 */
+  #elif defined(STM32L496xx) || defined(STM32L476xx) || \
+        defined(STM32L433xx) || defined(STM32L432xx)
+  if (inv_) {
+    uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
+  } else {
+    uart_->begin(BAUD_, SERIAL_8E2);
+  }
+  /* ESP32 */
+  #elif defined(ESP32)
+  uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, inv_);
+  /* Everything else, with a hardware inverter */
+  #else
+  uart_->begin(BAUD_, SERIAL_8E2);
+  #endif
   /* flush the bus */
   uart_->flush();
 }
@@ -166,34 +174,42 @@ namespace {
 #endif
 
 void SbusTx::Begin() {
-  if (!inv_) {
-    uart_->begin(BAUD_, SERIAL_8E2);
+  /* Start the bus */
+  /* Teensy 3.0 || Teensy 3.1/3.2 */
+  #if defined(__MK20DX128__) || defined(__MK20DX256__)
+  if (inv_) {
+    uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
   } else {
-    /* Start the bus */
-    /* Teensy 3.0 || Teensy 3.1/3.2 */
-    #if defined(__MK20DX128__) || defined(__MK20DX256__)
-      uart_->begin(BAUD_, SERIAL_8E1_RXINV_TXINV);
-    /*
-    * Teensy 3.5 || Teensy 3.6 ||
-    * Teensy LC  || Teensy 4.0/4.1 ||
-    * Teensy 4.0 Beta
-    */
-    #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
-          defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
-          defined(__IMXRT1052__)
-      uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
-    /* STM32L4 */
-    #elif defined(STM32L496xx) || defined(STM32L476xx) || \
-          defined(STM32L433xx) || defined(STM32L432xx)
-      uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
-    /* ESP32 */
-    #elif defined(ESP32)
-      uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, true);
-    /* Everything else, with a hardware inverter */
-    #else
-      uart_->begin(BAUD_, SERIAL_8E2);
-    #endif
+    uart_->begin(BAUD_, SERIAL_8E1);
   }
+  /*
+  * Teensy 3.5 || Teensy 3.6 ||
+  * Teensy LC  || Teensy 4.0/4.1 ||
+  * Teensy 4.0 Beta
+  */
+  #elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
+        defined(__MKL26Z64__)  || defined(__IMXRT1062__) || \
+        defined(__IMXRT1052__)
+  if (inv_){
+    uart_->begin(BAUD_, SERIAL_8E2_RXINV_TXINV);
+  } else {
+    uart_->begin(BAUD_, SERIAL_8E2);
+  }
+  /* STM32L4 */
+  #elif defined(STM32L496xx) || defined(STM32L476xx) || \
+        defined(STM32L433xx) || defined(STM32L432xx)
+  if (inv_) {
+    uart_->begin(BAUD_, SERIAL_8E2 | 0xC000ul);
+  } else {
+    uart_->begin(BAUD_, SERIAL_8E2);
+  }
+  /* ESP32 */
+  #elif defined(ESP32)
+  uart_->begin(BAUD_, SERIAL_8E2, rxpin_, txpin_, inv_);
+  /* Everything else, with a hardware inverter */
+  #else
+  uart_->begin(BAUD_, SERIAL_8E2);
+  #endif
 }
 
 void SbusTx::Write() {
