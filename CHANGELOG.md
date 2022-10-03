@@ -1,5 +1,8 @@
 # Changelog
 
+## v8.1.1
+- Updated core to support MMOD
+
 ## v8.1.0
 - Added option for fast SBUS (200000 baud)
 
