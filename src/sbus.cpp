@@ -165,7 +165,7 @@ namespace {
   IntervalTimer serial_timer;
   HardwareSerial *sbus_bus;
   uint8_t sbus_packet[25];
-  volatile int send_index;
+  volatile int send_index = 0;
   void SendByte() {
     if (send_index < 25) {
       sbus_bus->write(sbus_packet[send_index]);
@@ -187,6 +187,7 @@ void SbusTx::Begin() {
   /* Start the bus */
   /* Teensy 3.0 || Teensy 3.1/3.2 */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
+  sbus_bus = uart_;
   if (inv_) {
     uart_->begin(baud_, SERIAL_8E1_RXINV_TXINV);
   } else {

@@ -1,5 +1,8 @@
 # Changelog
 
+## v8.1.4
+- Fixed a bug where trying to write SBUS packets with Teensy 3.1/3.2 would hang the processor by de-referencing a null pointer
+
 ## v8.1.3
 - Updated core to v3.1.3
 
