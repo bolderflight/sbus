@@ -1,7 +1,7 @@
 /*
 * Brian R Taylor
 * brian.taylor@bolderflight.com
-* 
+*
 * Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,9 +51,8 @@ class SbusRx {
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
   SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
-         const bool inv, const bool fast) : uart_(bus), inv_(inv),
-                                            rxpin_(rxpin), txpin_(txpin),
-                                            fast_(fast) {}
+         const bool inv, const bool fast) : uart_(bus), inv_(inv), fast_(fast),
+                                            rxpin_(rxpin), txpin_(txpin) {}
   #else
   explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
   SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
@@ -106,9 +105,8 @@ class SbusTx {
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
   SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
-         const bool inv, const bool fast) : uart_(bus), inv_(inv),
-                                            rxpin_(rxpin), txpin_(txpin),
-                                            fast_(fast) {}
+         const bool inv, const bool fast) : uart_(bus), inv_(inv), fast_(fast),
+                                            rxpin_(rxpin), txpin_(txpin) {}
   #else
   explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
   SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
