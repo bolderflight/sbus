@@ -1,7 +1,7 @@
 /*
 * Brian R Taylor
 * brian.taylor@bolderflight.com
-* 
+*
 * Copyright (c) 2022 Bolder Flight Systems Inc
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -109,36 +109,42 @@ bool SbusRx::Parse() {
       prev_byte_ = cur_byte_;
       if ((cur_byte_ == FOOTER_) || ((cur_byte_ & 0x0F) == FOOTER2_)) {
         /* Grab the channel data */
-        data_.ch[0]  = static_cast<int16_t>(buf_[1] | buf_[2] << 8 & 0x07FF);
-        data_.ch[1]  = static_cast<int16_t>(buf_[2] >> 3 | buf_[3] << 5 &
-                                            0x07FF);
-        data_.ch[2]  = static_cast<int16_t>(buf_[3] >> 6 | buf_[4] << 2  |
-                                            buf_[5] << 10 & 0x07FF);
-        data_.ch[3]  = static_cast<int16_t>(buf_[5] >> 1 | buf_[6] << 7 &
-                                            0x07FF);
-        data_.ch[4]  = static_cast<int16_t>(buf_[6] >> 4 | buf_[7] << 4 &
-                                            0x07FF);
-        data_.ch[5]  = static_cast<int16_t>(buf_[7] >> 7 | buf_[8] << 1 |
-                                            buf_[9] << 9 & 0x07FF);
-        data_.ch[6]  = static_cast<int16_t>(buf_[9] >> 2 | buf_[10] << 6 &
-                                            0x07FF);
-        data_.ch[7]  = static_cast<int16_t>(buf_[10] >> 5 | buf_[11] << 3 &
-                                            0x07FF);
-        data_.ch[8]  = static_cast<int16_t>(buf_[12] | buf_[13] << 8 & 0x07FF);
-        data_.ch[9]  = static_cast<int16_t>(buf_[13] >> 3 | buf_[14] << 5 &
-                                            0x07FF);
-        data_.ch[10] = static_cast<int16_t>(buf_[14] >> 6 | buf_[15] << 2 |
-                                            buf_[16] << 10 & 0x07FF);
-        data_.ch[11] = static_cast<int16_t>(buf_[16] >> 1 | buf_[17] << 7 &
-                                            0x07FF);
-        data_.ch[12] = static_cast<int16_t>(buf_[17] >> 4 | buf_[18] << 4 &
-                                            0x07FF);
-        data_.ch[13] = static_cast<int16_t>(buf_[18] >> 7 | buf_[19] << 1  |
-                                            buf_[20] << 9 & 0x07FF);
-        data_.ch[14] = static_cast<int16_t>(buf_[20] >> 2 | buf_[21] << 6 &
-                                            0x07FF);
-        data_.ch[15] = static_cast<int16_t>(buf_[21] >> 5 | buf_[22] << 3 &
-                                            0x07FF);
+        data_.ch[0]  = static_cast<int16_t>(buf_[1] |
+                                            ((buf_[2] << 8) & 0x07FF));
+        data_.ch[1]  = static_cast<int16_t>((buf_[2] >> 3) |
+                                            ((buf_[3] << 5) & 0x07FF));
+        data_.ch[2]  = static_cast<int16_t>((buf_[3] >> 6) |
+                                            (buf_[4] << 2) |
+                                            ((buf_[5] << 10) & 0x07FF));
+        data_.ch[3]  = static_cast<int16_t>((buf_[5] >> 1) |
+                                            ((buf_[6] << 7) & 0x07FF));
+        data_.ch[4]  = static_cast<int16_t>((buf_[6] >> 4) |
+                                            ((buf_[7] << 4) & 0x07FF));
+        data_.ch[5]  = static_cast<int16_t>((buf_[7] >> 7) |
+                                            (buf_[8] << 1) |
+                                            ((buf_[9] << 9) & 0x07FF));
+        data_.ch[6]  = static_cast<int16_t>((buf_[9] >> 2) |
+                                            ((buf_[10] << 6) & 0x07FF));
+        data_.ch[7]  = static_cast<int16_t>((buf_[10] >> 5) |
+                                            ((buf_[11] << 3) & 0x07FF));
+        data_.ch[8]  = static_cast<int16_t>(buf_[12] |
+                                            ((buf_[13] << 8) & 0x07FF));
+        data_.ch[9]  = static_cast<int16_t>((buf_[13] >> 3) |
+                                            ((buf_[14] << 5) & 0x07FF));
+        data_.ch[10] = static_cast<int16_t>((buf_[14] >> 6) |
+                                            (buf_[15] << 2) |
+                                            ((buf_[16] << 10) & 0x07FF));
+        data_.ch[11] = static_cast<int16_t>((buf_[16] >> 1) |
+                                            ((buf_[17] << 7) & 0x07FF));
+        data_.ch[12] = static_cast<int16_t>((buf_[17] >> 4) |
+                                            ((buf_[18] << 4) & 0x07FF));
+        data_.ch[13] = static_cast<int16_t>((buf_[18] >> 7) |
+                                            (buf_[19] << 1) |
+                                            ((buf_[20] << 9) & 0x07FF));
+        data_.ch[14] = static_cast<int16_t>((buf_[20] >> 2) |
+                                            ((buf_[21] << 6) & 0x07FF));
+        data_.ch[15] = static_cast<int16_t>((buf_[21] >> 5) |
+                                            ((buf_[22] << 3) & 0x07FF));
         /* CH 17 */
         data_.ch17 = buf_[23] & CH17_MASK_;
         /* CH 18 */
@@ -268,7 +274,7 @@ void SbusTx::Write() {
   buf_[24] = FOOTER_;
   /* Send packet to servos */
   #if defined(__MK20DX128__) || defined(__MK20DX256__)
-  /* 
+  /*
   * Use ISR to send byte at a time,
   * 130 us between bytes to emulate 2 stop bits
   */
