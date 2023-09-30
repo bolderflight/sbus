@@ -26,10 +26,13 @@
 #include "sbus.h"
 #include "ppm.h"
 
+#define PIN_INPUT  33
+#define PIN_OUTPUT 32
+
 /* SBUS object, reading SBUS */
-bfs::SbusRx sbus_rx(&Serial2);
-/* SBUS object, writing SBUS */
-bfs::SbusTx sbus_tx(&Serial2);
+bfs::SbusRx rx(&Serial, PIN_INPUT, PIN_OUTPUT, false);
+/* PPMEncoder object, writing PPM */
+PPMEncoder tx;
 /* SBUS data */
 bfs::SbusData data;
 
@@ -38,26 +41,26 @@ void setup() {
   Serial.begin(115200);
   while (!Serial) {}
   /* Begin the SBUS communication */
-  sbus_rx.Begin();
-  sbus_tx.Begin();
+  rx.Begin();
+  /* and the PPM as well */
+  tx.begin(PIN_OUTPUT, 16, false);
 }
 
 void loop () {
-  if (sbus_rx.Read()) {
+  if (rx.Read()) {
     /* Grab the received data */
-    data = sbus_rx.data();
+    data = rx.data();
     /* Display the received data */
     for (int8_t i = 0; i < data.NUM_CH; i++) {
       Serial.print(data.ch[i]);
       Serial.print("\t");
+
+      tx.setChannel(i, data.ch[i]);
     }
+    
     /* Display lost frames and failsafe data */
-    Serial.print(data.lost_frame);
-    Serial.print("\t");
-    Serial.println(data.failsafe);
-    /* Set the SBUS TX data to the received data */
-    sbus_tx.data(data);
-    /* Write the data to the servos */
-    sbus_tx.Write();
+    //Serial.print(data.lost_frame);
+    //Serial.print("\t");
+    //Serial.println(data.failsafe);
   }
 }
