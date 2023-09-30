@@ -24,6 +24,7 @@
 */
 
 #include "sbus.h"
+#include "ppm.h"
 
 /* SBUS object, reading SBUS */
 bfs::SbusRx sbus_rx(&Serial2);
